@@ -19,11 +19,12 @@ export default function RootLayout({
     <html lang="es" suppressHydrationWarning>
       <body>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <div className="flex flex-col min-h-screen bg-gradient-mesh">
+          <div className="flex flex-col min-h-screen relative z-10">
             <Header />
             <main className="flex-1">{children}</main>
             <Footer />
           </div>
+
         </ThemeProvider>
       </body>
     </html>

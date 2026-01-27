@@ -124,8 +124,7 @@ export function ChatInput({ onSend, disabled = false, className }: ChatInputProp
           size="icon"
           className={cn(
             "h-[50px] w-[50px] rounded-full flex-shrink-0 shadow-lg",
-            "bg-gradient-to-r from-primary-500 to-primary-600",
-            "hover:from-primary-600 hover:to-primary-700",
+            "bg-primary-600 hover:bg-primary-700 text-white",
             "disabled:opacity-50 disabled:cursor-not-allowed",
             "transition-all hover:scale-105 active:scale-95"
           )}

@@ -55,7 +55,7 @@ export function FeaturesSection() {
   };
 
   return (
-    <section className="py-24 px-4 section-bg-light">
+    <section className="py-24 px-4 bg-secondary-100 dark:bg-secondary-900">
       <div className="container mx-auto">
         {/* Header */}
         <motion.div
@@ -65,11 +65,11 @@ export function FeaturesSection() {
           transition={{ duration: 0.6 }}
           className="text-center mb-20"
         >
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black mb-6">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black mb-6 text-secondary-900 dark:text-white">
             Todo lo que necesitas en{' '}
-            <span className="gradient-text">un solo lugar</span>
+            <span className="text-primary-600 dark:text-primary-500">un solo lugar</span>
           </h2>
-          <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl md:text-2xl text-secondary-600 dark:text-secondary-400 max-w-3xl mx-auto leading-relaxed">
             Accede fácilmente a información de salud pública mediante
             conversación natural
           </p>
@@ -88,17 +88,17 @@ export function FeaturesSection() {
               key={index}
               variants={item}
               whileHover={{ y: -8 }}
-              className={`group glass dark:glass rounded-3xl p-8 card-hover ${feature.bg} border border-gray-100 dark:border-gray-800`}
+              className={`group glass-panel rounded-3xl p-8 hover:border-primary-500/50 transition-all border border-transparent`}
             >
               <div
                 className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg`}
               >
                 <feature.icon className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold mb-3 text-gray-900 dark:text-white">
+              <h3 className="text-2xl font-bold mb-3 text-secondary-900 dark:text-white">
                 {feature.title}
               </h3>
-              <p className="text-base text-gray-600 dark:text-gray-400 leading-relaxed">
+              <p className="text-base text-secondary-600 dark:text-secondary-400 leading-relaxed">
                 {feature.description}
               </p>
             </motion.div>

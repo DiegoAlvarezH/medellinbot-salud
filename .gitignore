@@ -39,3 +39,25 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+.agent
+
+.agents
+
+.claude
+
+.claude-agent
+
+.claude-agent.json
+
+.gemini
+
+.gemini-agent
+
+.gemini-agent.json
+
+.env
+
+.env.local
+
+.env.example

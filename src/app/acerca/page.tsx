@@ -112,7 +112,7 @@ export default function AboutPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: 'spring' }}
-              className="inline-flex items-center gap-3 px-6 py-3 glass dark:glass rounded-full mb-8 border border-primary-200 dark:border-primary-800 shadow-lg"
+              className="inline-flex items-center gap-3 px-6 py-3 glass-panel rounded-full mb-8 border border-primary-200 dark:border-primary-800 shadow-lg"
             >
               <div className="relative">
                 <Sparkles className="w-5 h-5 text-primary-600 dark:text-primary-400" />
@@ -123,12 +123,12 @@ export default function AboutPage() {
               </span>
             </motion.div>
 
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-8 leading-tight">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black mb-8 leading-tight text-secondary-900 dark:text-white">
               Acerca de{' '}
               <span className="gradient-text block md:inline">MedellínBot Salud</span>
             </h1>
             
-            <p className="text-xl md:text-2xl lg:text-3xl text-gray-700 dark:text-gray-300 leading-relaxed max-w-4xl mx-auto font-medium">
+            <p className="text-xl md:text-2xl lg:text-3xl text-secondary-700 dark:text-secondary-300 leading-relaxed max-w-4xl mx-auto font-medium">
               Tu asistente inteligente que transforma la forma en que los ciudadanos
               acceden a información vital de{' '}
               <span className="font-bold text-primary-600 dark:text-primary-400">
@@ -208,10 +208,10 @@ export default function AboutPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-black mb-4">
+            <h2 className="text-4xl md:text-5xl font-black mb-4 text-secondary-900 dark:text-white">
               ¿Por qué <span className="gradient-text">MedellínBot</span>?
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            <p className="text-xl text-secondary-600 dark:text-secondary-400 max-w-2xl mx-auto">
               Combinamos tecnología de punta con un enfoque humano para mejorar el acceso a la salud
             </p>
           </motion.div>
@@ -225,13 +225,13 @@ export default function AboutPage() {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
                 whileHover={{ y: -8 }}
-                className="glass dark:glass rounded-3xl p-8 card-hover border border-gray-100 dark:border-gray-800"
+                className="glass-panel rounded-3xl p-8 card-hover border border-secondary-100 dark:border-secondary-800"
               >
                 <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 shadow-lg`}>
                   <feature.icon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">{feature.title}</h3>
-                <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-lg">
+                <h3 className="text-2xl font-bold mb-4 text-secondary-900 dark:text-white">{feature.title}</h3>
+                <p className="text-secondary-600 dark:text-secondary-400 leading-relaxed text-lg">
                   {feature.description}
                 </p>
               </motion.div>
@@ -249,10 +249,10 @@ export default function AboutPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-black mb-4">
+            <h2 className="text-4xl md:text-5xl font-black mb-4 text-secondary-900 dark:text-white">
               Fuentes de <span className="gradient-text">Datos Oficiales</span>
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-400">
+            <p className="text-xl text-secondary-600 dark:text-secondary-400">
               Información confiable y actualizada constantemente
             </p>
           </motion.div>
@@ -262,13 +262,13 @@ export default function AboutPage() {
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="glass dark:glass rounded-3xl p-8 border-2 border-primary-200 dark:border-primary-800/50 hover:border-primary-300 dark:hover:border-primary-700 transition-all"
+              className="glass-panel rounded-3xl p-8 border-2 border-primary-200 dark:border-primary-800/50 hover:border-primary-300 dark:hover:border-primary-700 transition-all text-secondary-900 dark:text-white"
             >
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-emerald-500 flex items-center justify-center mb-6 shadow-xl">
                 <Database className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">MEData</h3>
-              <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+              <h3 className="text-2xl font-bold mb-4">MEData</h3>
+              <p className="text-secondary-600 dark:text-secondary-400 leading-relaxed">
                 Plataforma de datos abiertos de Medellín con información actualizada sobre servicios de salud,
                 ubicaciones, horarios y especialidades médicas disponibles en la ciudad.
               </p>
@@ -278,13 +278,13 @@ export default function AboutPage() {
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="glass dark:glass rounded-3xl p-8 border-2 border-secondary-200 dark:border-secondary-800/50 hover:border-secondary-300 dark:hover:border-secondary-700 transition-all"
+              className="glass-panel rounded-3xl p-8 border-2 border-secondary-200 dark:border-secondary-800/50 hover:border-secondary-300 dark:hover:border-secondary-700 transition-all text-secondary-900 dark:text-white"
             >
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-secondary-500 to-blue-500 flex items-center justify-center mb-6 shadow-xl">
                 <Cloud className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">SIATA</h3>
-              <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+              <h3 className="text-2xl font-bold mb-4">SIATA</h3>
+              <p className="text-secondary-600 dark:text-secondary-400 leading-relaxed">
                 Sistema de Alerta Temprana de Medellín y el Valle de Aburrá. Datos en tiempo real sobre
                 calidad del aire, ICA y recomendaciones de salud personalizadas.
               </p>
@@ -296,22 +296,22 @@ export default function AboutPage() {
       {/* Team Section */}
       <section className="py-24 section-bg-light">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto glass dark:glass rounded-3xl p-10 md:p-12 text-center border border-gray-100 dark:border-gray-800">
+          <div className="max-w-4xl mx-auto glass-panel rounded-3xl p-10 md:p-12 text-center border border-secondary-100 dark:border-secondary-800">
             <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-6 shadow-xl">
               <Users className="w-10 h-10 text-white" />
             </div>
-            <h2 className="text-3xl md:text-4xl font-black mb-6 text-gray-900 dark:text-white">Equipo Desarrollador</h2>
-            <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
+            <h2 className="text-3xl md:text-4xl font-black mb-6 text-secondary-900 dark:text-white">Equipo Desarrollador</h2>
+            <p className="text-lg text-secondary-700 dark:text-secondary-300 leading-relaxed mb-6">
               Este proyecto fue desarrollado por estudiantes de la{' '}
               <span className="font-bold text-primary-600 dark:text-primary-400">
                 Universidad Nacional Abierta y a Distancia (UNAD)
               </span>{' '}
               como parte de un proyecto de investigación en tecnologías aplicadas a la salud pública.
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-secondary-500 dark:text-secondary-400">
               Contacto:{' '}
-              <a href="mailto:info@medellinbot.co" className="text-primary-600 dark:text-primary-400 hover:underline font-medium">
-                info@medellinbot.co
+              <a href="mailto:daalvarezherr@unadvirtual.edu.co" className="text-primary-600 dark:text-primary-400 hover:underline font-medium">
+                daalvarezherr@unadvirtual.edu.co
               </a>
             </p>
           </div>
@@ -325,7 +325,7 @@ export default function AboutPage() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="max-w-4xl mx-auto glass dark:glass rounded-3xl p-8 border-2 border-yellow-200 dark:border-yellow-800/50"
+            className="max-w-4xl mx-auto glass-panel rounded-3xl p-8 border-2 border-yellow-200 dark:border-yellow-800/50"
           >
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0">
@@ -334,10 +334,10 @@ export default function AboutPage() {
                 </div>
               </div>
               <div>
-                <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Aviso Legal y Médico</h3>
-                <div className="space-y-3 text-gray-700 dark:text-gray-300">
+                <h3 className="text-2xl font-bold mb-4 text-secondary-900 dark:text-white">Aviso Legal y Médico</h3>
+                <div className="space-y-3 text-secondary-700 dark:text-secondary-300">
                   <p className="leading-relaxed">
-                    <strong className="text-gray-900 dark:text-white">⚠️ Importante:</strong> MedellínBot Salud es un asistente informativo
+                    <strong className="text-secondary-900 dark:text-white">⚠️ Importante:</strong> MedellínBot Salud es un asistente informativo
                     que proporciona información general sobre servicios de salud pública. NO proporciona diagnósticos médicos
                     ni reemplaza la consulta con profesionales de la salud.
                   </p>
@@ -368,10 +368,10 @@ export default function AboutPage() {
             <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center mb-6 shadow-lg">
               <CircleHelp className="w-10 h-10 text-white" />
             </div>
-            <h2 className="text-4xl md:text-5xl font-black mb-4">
+            <h2 className="text-4xl md:text-5xl font-black mb-4 text-secondary-900 dark:text-white">
               Preguntas <span className="gradient-text">Frecuentes</span>
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-400">
+            <p className="text-xl text-secondary-600 dark:text-secondary-400">
               Encuentra respuestas rápidas a las dudas más comunes
             </p>
           </motion.div>
@@ -386,13 +386,13 @@ export default function AboutPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  className={`glass dark:glass rounded-2xl overflow-hidden cursor-pointer group border-2 border-${faq.color}-200 dark:border-${faq.color}-800/50 hover:border-${faq.color}-300 dark:hover:border-${faq.color}-700 transition-all hover:shadow-2xl`}
+                  className={`glass-panel rounded-2xl overflow-hidden cursor-pointer group border-2 border-${faq.color}-200 dark:border-${faq.color}-800/50 hover:border-${faq.color}-300 dark:hover:border-${faq.color}-700 transition-all hover:shadow-2xl`}
                 >
                   <summary className="p-6 list-none flex items-center gap-4">
                     <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${faq.gradient} flex items-center justify-center flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform`}>
                       <Icon className="w-6 h-6 text-white" />
                     </div>
-                    <span className="font-bold text-lg flex-1 text-gray-900 dark:text-white">
+                    <span className="font-bold text-lg flex-1 text-secondary-900 dark:text-white">
                       {faq.q}
                     </span>
                     <div className={`w-8 h-8 rounded-full bg-${faq.color}-100 dark:bg-${faq.color}-900/30 flex items-center justify-center group-open:rotate-180 transition-transform flex-shrink-0`}>
@@ -404,7 +404,7 @@ export default function AboutPage() {
                   <div className="px-6 pb-6 pt-2">
                     <div className={`flex items-start gap-3 p-4 rounded-xl bg-${faq.color}-50 dark:bg-${faq.color}-950/20 border-l-4 border-${faq.color}-500`}>
                       <Check className={`w-5 h-5 flex-shrink-0 mt-0.5 text-${faq.color}-600 dark:text-${faq.color}-400`} />
-                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                      <p className="text-secondary-700 dark:text-secondary-300 leading-relaxed">
                         {faq.a}
                       </p>
                     </div>

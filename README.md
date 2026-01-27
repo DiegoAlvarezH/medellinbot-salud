@@ -37,12 +37,14 @@ Tu asistente de salud pública inteligente para la ciudad de Medellín. Encuentr
 ### Pasos de Instalación
 
 1. **Clonar el repositorio** (o descargar los archivos):
+
 ```bash
 git clone <repository-url>
 cd bolt-project
 ```
 
-2. **Instalar dependencias**:
+1. **Instalar dependencias**:
+
 ```bash
 npm install
 # o
@@ -51,7 +53,8 @@ yarn install
 pnpm install
 ```
 
-3. **Ejecutar el servidor de desarrollo**:
+1. **Ejecutar el servidor de desarrollo**:
+
 ```bash
 npm run dev
 # o
@@ -60,7 +63,8 @@ yarn dev
 pnpm dev
 ```
 
-4. **Abrir en el navegador**:
+1. **Abrir en el navegador**:
+
 ```
 http://localhost:3000
 ```
@@ -102,7 +106,7 @@ bolt-project/
 - **Primario (Verde Esmeralda)**: `#10b981`, `#059669` - Salud, bienestar, naturaleza
 - **Secundario (Azul Confianza)**: `#3b82f6`, `#2563eb` - Profesionalismo, tecnología
 - **Acento (Naranja Cálido)**: `#f97316`, `#ea580c` - Llamados a acción importantes
-- **Estados Semánticos**: 
+- **Estados Semánticos**:
   - ✅ Verde: Servicios abiertos, buena calidad del aire
   - ⚠️ Amarillo: Advertencias, calidad moderada
   - 🔴 Rojo: Emergencias, calidad dañina
@@ -142,13 +146,14 @@ Las siguientes integraciones están preparadas con interfaces pero **NO implemen
 ### Para Implementar APIs Reales
 
 1. Agregar variables de entorno en `.env.local`:
+
 ```env
 NEXT_PUBLIC_OPENAI_API_KEY=tu_api_key
 NEXT_PUBLIC_SUPABASE_URL=tu_url
 NEXT_PUBLIC_SUPABASE_KEY=tu_key
 ```
 
-2. Implementar las funciones en `src/lib/api/`
+1. Implementar las funciones en `src/lib/api/`
 
 ## 📱 PWA (Progressive Web App)
 
@@ -214,7 +219,7 @@ Las contribuciones son bienvenidas. Por favor:
 
 ## 📧 Contacto
 
-- Email: info@medellinbot.co
+- Email: <daalvarezherr@unadvirtual.edu.co>
 - Website: [En construcción]
 
 ---

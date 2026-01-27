@@ -39,7 +39,7 @@ export function Header() {
       className={cn(
         'sticky top-0 z-50 w-full transition-all duration-300 border-b border-transparent',
         scrolled
-          ? 'glass shadow-sm border-gray-200/50 dark:border-gray-800/50'
+          ? 'glass-panel shadow-sm border-secondary-200/50 dark:border-secondary-800/50'
           : 'bg-transparent'
       )}
     >
@@ -55,16 +55,16 @@ export function Header() {
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-500 via-secondary-500 to-accent-500 flex items-center justify-center shadow-lg group-hover:shadow-primary-500/30 transition-all duration-300">
                 <Sparkles className="w-6 h-6 text-white" />
               </div>
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full animate-pulse border-2 border-white dark:border-gray-900"></div>
+              <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full animate-pulse border-2 border-white dark:border-secondary-900"></div>
             </motion.div>
             <div className="hidden sm:block">
-              <h1 className="font-bold text-2xl leading-none tracking-tight">
-                <span className="bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">
+              <h1 className="font-bold text-2xl leading-none tracking-tight text-secondary-900 dark:text-white">
+                <span className="bg-gradient-to-r from-primary-600 to-secondary-600 dark:from-primary-400 dark:to-secondary-400 bg-clip-text text-transparent">
                   Medellín
                 </span>
-                <span className="text-gray-900 dark:text-white">Bot</span>
+                Bot
               </h1>
-              <div className="text-xs font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1">
+              <div className="text-xs font-medium text-secondary-500 dark:text-secondary-400 flex items-center gap-1">
                 <Activity className="w-3 h-3 text-primary-500" />
                 Salud Pública
               </div>
@@ -72,7 +72,7 @@ export function Header() {
           </Link>
 
           {/* Navigation - Desktop */}
-          <nav className="hidden md:flex items-center gap-1 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm p-1.5 rounded-full border border-gray-200/50 dark:border-gray-700/50 shadow-sm">
+          <nav className="hidden md:flex items-center gap-1 bg-white/50 dark:bg-secondary-900/50 backdrop-blur-sm p-1.5 rounded-full border border-secondary-200/50 dark:border-secondary-700/50 shadow-sm">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -84,7 +84,7 @@ export function Header() {
                     'relative z-10 transition-colors duration-300',
                     pathname === link.href
                       ? 'text-primary-700 dark:text-primary-300'
-                      : 'text-gray-600 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400'
+                      : 'text-secondary-600 dark:text-secondary-400 group-hover:text-primary-600 dark:group-hover:text-primary-400'
                   )}
                 >
                   {link.label}
@@ -92,7 +92,7 @@ export function Header() {
                 {pathname === link.href && (
                   <motion.div
                     layoutId="navbar-indicator"
-                    className="absolute inset-0 bg-white dark:bg-gray-700 rounded-full shadow-sm"
+                    className="absolute inset-0 bg-white dark:bg-secondary-800 rounded-full shadow-sm"
                     transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                   />
                 )}
@@ -119,7 +119,7 @@ export function Header() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                className="relative rounded-full w-10 h-10 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                className="relative rounded-full w-10 h-10 bg-secondary-100 dark:bg-secondary-800 hover:bg-secondary-200 dark:hover:bg-secondary-700 transition-colors"
               >
                 <Sun className="h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-amber-500" />
                 <Moon className="absolute h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-blue-600" />
@@ -132,7 +132,7 @@ export function Header() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="md:hidden rounded-full w-10 h-10 bg-gray-100 dark:bg-gray-800"
+                className="md:hidden rounded-full w-10 h-10 bg-secondary-100 dark:bg-secondary-800 text-secondary-900 dark:text-white"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
                 {mobileMenuOpen ? (
@@ -155,7 +155,7 @@ export function Header() {
             exit={{ opacity: 0, y: -20 }}
             className="md:hidden fixed inset-x-0 top-[80px] p-4 z-40"
           >
-            <div className="glass dark:glass rounded-3xl p-4 shadow-2xl border border-gray-200/50 dark:border-gray-700/50">
+            <div className="glass-panel rounded-3xl p-4 shadow-2xl border border-secondary-200/50 dark:border-secondary-700/50">
               <nav className="space-y-2">
                 {navLinks.map((link, index) => (
                   <motion.div
@@ -171,7 +171,7 @@ export function Header() {
                         'flex items-center justify-between px-6 py-4 rounded-2xl text-base font-semibold transition-all',
                         pathname === link.href
                           ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 shadow-sm'
-                          : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                          : 'text-secondary-600 dark:text-secondary-300 hover:bg-secondary-50 dark:hover:bg-secondary-800'
                       )}
                     >
                       {link.label}
@@ -186,8 +186,8 @@ export function Header() {
                 ))}
               </nav>
               
-              <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
-                <div className="flex items-center justify-center gap-4 text-sm text-gray-500">
+              <div className="mt-6 pt-6 border-t border-secondary-100 dark:border-secondary-800">
+                <div className="flex items-center justify-center gap-4 text-sm text-secondary-500">
                   <span>© 2024 MedellínBot</span>
                 </div>
               </div>
