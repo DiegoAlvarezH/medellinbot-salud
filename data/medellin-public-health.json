@@ -1,0 +1,14 @@
+{
+  "docs": [
+    {
+      "id": "linea-salud",
+      "content": "Linea de orientacion en salud de Medellin: para emergencias llamar al 123. Para orientacion general, usar canales oficiales de la Alcaldia y EPS.",
+      "tags": ["emergencia", "linea", "123", "orientacion"]
+    },
+    {
+      "id": "fuentes-publicas",
+      "content": "Las fuentes de datos recomendadas para informacion publica de salud y ambiente son SIATA, portal de datos abiertos de Medellin y entidades del Valle de Aburra.",
+      "tags": ["siata", "datos abiertos", "amva", "medellin"]
+    }
+  ]
+}

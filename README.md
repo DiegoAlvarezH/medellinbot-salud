@@ -134,26 +134,56 @@ El chatbot entiende preguntas en lenguaje natural en español. Ejemplos:
 - Marcadores interactivos con información detallada
 - Auto-zoom al seleccionar un servicio
 
-## 🔌 Integraciones (Preparadas)
+## 🔌 Integraciones
 
-Las siguientes integraciones están preparadas con interfaces pero **NO implementadas**:
+Integraciones actuales:
 
-- **OpenAI/Claude**: Para IA conversacional (`src/lib/api/openai.ts`)
-- **Supabase/PostgreSQL**: Para base de datos (`src/lib/api/supabase.ts`)
-- **SIATA**: Para calidad del aire (`src/lib/api/siata.ts`)
-- **MEData**: Para servicios de salud (`src/lib/api/medata.ts`)
+- **Claude API (Anthropic)**: Implementada en la ruta de servidor de chat.
+- **RAG local basico**: Recuperacion de contexto desde base de conocimiento local en servidor.
+- **Ingesta por archivo JSON**: Puedes agregar conocimiento publico en `data/medellin-public-health.json`.
+
+Integraciones pendientes (opcionales):
+
+- **Supabase/PostgreSQL**: Para base de datos persistente.
+- **SIATA**: Para calidad del aire en tiempo real.
+- **MEData**: Para servicios de salud actualizados desde fuente oficial.
 
 ### Para Implementar APIs Reales
 
 1. Agregar variables de entorno en `.env.local`:
 
 ```env
-NEXT_PUBLIC_OPENAI_API_KEY=tu_api_key
-NEXT_PUBLIC_SUPABASE_URL=tu_url
-NEXT_PUBLIC_SUPABASE_KEY=tu_key
+ANTHROPIC_API_KEY=tu_claude_api_key
+ANTHROPIC_MODEL=claude-3-5-sonnet-latest
+# opcional
+# CLAUDE_API_KEY=tu_claude_api_key
+# NEXT_PUBLIC_SUPABASE_URL=tu_url
+# NEXT_PUBLIC_SUPABASE_KEY=tu_key
 ```
 
-1. Implementar las funciones en `src/lib/api/`
+2. Reiniciar el servidor de desarrollo para cargar las variables.
+
+### Ingesta de conocimiento publico (sin BD)
+
+Puedes cargar informacion adicional al RAG local editando:
+
+- `data/medellin-public-health.json`
+
+Formato:
+
+```json
+{
+  "docs": [
+    {
+      "id": "fuente-1",
+      "content": "Texto con informacion publica util.",
+      "tags": ["salud", "medellin", "amva"]
+    }
+  ]
+}
+```
+
+Si Claude falla (saldo, autenticacion o error temporal), el endpoint devuelve una respuesta de fallback con contexto local para evitar errores 500 al usuario final.
 
 ## 📱 PWA (Progressive Web App)
 

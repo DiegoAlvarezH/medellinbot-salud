@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Send, Mail, User, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
+import Link from 'next/link';
 
 export function ContactSection() {
   const [formState, setFormState] = useState({
@@ -71,8 +72,8 @@ export function ContactSection() {
                 <p className="text-secondary-600 dark:text-secondary-400 mb-6">
                   Usa nuestro asistente virtual para respuestas inmediatas.
                 </p>
-                <Button className="w-full rounded-xl bg-primary-600 hover:bg-primary-700 text-white shadow-lg shadow-primary-500/25">
-                  Iniciar Chat
+                <Button asChild className="w-full rounded-xl bg-primary-600 hover:bg-primary-700 text-white shadow-lg shadow-primary-500/25">
+                  <Link href="/chat">Iniciar Chat</Link>
                 </Button>
               </div>
             </motion.div>

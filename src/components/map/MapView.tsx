@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
 import { HealthService } from '@/types';
 import { Loader2 } from 'lucide-react';
@@ -119,9 +119,9 @@ const mapOptions = {
 };
 
 const lightMapOptions = {
-    disableDefaultUI: true,
-    zoomControl: true,
-}
+  disableDefaultUI: true,
+  zoomControl: true,
+};
 
 export default function MapView({ services, selectedService }: MapViewProps) {
   const { isLoaded } = useJsApiLoader({
@@ -131,29 +131,28 @@ export default function MapView({ services, selectedService }: MapViewProps) {
 
   const [map, setMap] = useState<google.maps.Map | null>(null);
 
-  const onLoad = useCallback(function callback(map: google.maps.Map) {
-    setMap(map);
+  const onLoad = useCallback((loadedMap: google.maps.Map) => {
+    setMap(loadedMap);
   }, []);
 
-  const onUnmount = useCallback(function callback(map: google.maps.Map) {
+  const onUnmount = useCallback(() => {
     setMap(null);
   }, []);
 
-  useMemo(() => {
+  useEffect(() => {
     if (map && selectedService) {
       map.panTo({ lat: selectedService.latitude, lng: selectedService.longitude });
       map.setZoom(15);
     }
   }, [map, selectedService]);
   
-  // Detect dark mode (simple check, ideally use a hook or context)
-   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Use effect to check for dark mode class on html/body
   useEffect(() => {
     const checkDarkMode = () => {
-        setIsDarkMode(document.documentElement.classList.contains('dark'));
-    }
+      setIsDarkMode(document.documentElement.classList.contains('dark'));
+    };
+
     checkDarkMode();
     const observer = new MutationObserver(checkDarkMode);
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
@@ -183,7 +182,7 @@ export default function MapView({ services, selectedService }: MapViewProps) {
           key={service.id}
           position={{ lat: service.latitude, lng: service.longitude }}
           title={service.name}
-          animation={window.google?.maps?.Animation?.DROP}
+          animation={isLoaded ? google.maps.Animation.DROP : undefined}
         />
       ))}
     </GoogleMap>

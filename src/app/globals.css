@@ -54,7 +54,7 @@
   }
 
   .bg-gradient-subtle {
-    @apply bg-gradient-to-b from-secondary-50 to-white dark:from-secondary-950 dark:to-black;
+    @apply bg-linear-to-b from-secondary-50 to-white dark:from-secondary-950 dark:to-black;
   }
 
   .section-bg-light {
@@ -62,7 +62,7 @@
   }
   
   .gradient-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-accent-600 dark:from-primary-400 dark:to-accent-400;
+    @apply bg-clip-text text-transparent bg-linear-to-r from-primary-600 to-accent-600 dark:from-primary-400 dark:to-accent-400;
   }
 
   .card-hover {
@@ -78,6 +78,19 @@ body {
   @apply antialiased selection:bg-primary-500 selection:text-white;
 }
 
+main {
+  position: relative;
+}
+
+main::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 15% 10%, rgba(20, 184, 166, 0.08), transparent 40%),
+    radial-gradient(circle at 85% 0%, rgba(14, 165, 233, 0.07), transparent 45%);
+}
+
 .dark body {
   background-color: var(--color-secondary-950);
   color: var(--color-secondary-50);
@@ -86,6 +99,11 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-family-heading);
   letter-spacing: -0.03em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
 }
 
 /* Custom Scrollbar */
@@ -104,4 +122,15 @@ h1, h2, h3, h4, h5, h6 {
 
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-secondary-400 dark:bg-secondary-600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
