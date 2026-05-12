@@ -124,9 +124,11 @@ const lightMapOptions = {
 };
 
 export default function MapView({ services, selectedService }: MapViewProps) {
-  const { isLoaded } = useJsApiLoader({
+  const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
+
+  const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
+    googleMapsApiKey,
   });
 
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -161,6 +163,27 @@ export default function MapView({ services, selectedService }: MapViewProps) {
 
 
   if (!isLoaded) {
+    if (!googleMapsApiKey) {
+      return (
+        <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-2xl p-4 text-center">
+          <p className="text-sm text-gray-700 dark:text-gray-200">
+            Falta configurar <strong>NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</strong> para mostrar el mapa.
+          </p>
+        </div>
+      );
+    }
+
+    if (loadError) {
+      return (
+        <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-2xl p-4 text-center">
+          <p className="text-sm text-gray-700 dark:text-gray-200">
+            No se pudo cargar Google Maps. Verifica que la clave tenga facturacion activa,
+            API de Maps JavaScript habilitada y dominio autorizado.
+          </p>
+        </div>
+      );
+    }
+
     return (
       <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-2xl">
         <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
