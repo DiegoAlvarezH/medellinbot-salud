@@ -1,30 +1,57 @@
-import type { Metadata } from "next";
-import { ThemeProvider } from "@/components/theme-provider";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import "./globals.css";
+import type { Metadata, Viewport } from 'next';
+import { Inter } from 'next/font/google';
+import { ThemeProvider } from '@/components/theme-provider';
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
+import { FooterGate } from '@/components/layout/FooterGate';
+import './globals.css';
+
+// Inter is only a fallback: Apple devices render SF Pro through the system font stack.
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
 export const metadata: Metadata = {
-  title: "MedellínBot Salud - Tu Asistente de Salud Pública",
-  description: "Encuentra servicios de salud, información de vacunación y calidad del aire en Medellín mediante conversación con IA",
-  keywords: ["salud", "Medellín", "chatbot", "servicios de salud", "vacunación", "calidad del aire"],
+  title: {
+    default: 'MedellínBot Salud',
+    template: '%s · MedellínBot Salud',
+  },
+  description:
+    'Asistente de salud pública para Medellín: centros de salud cercanos, calidad del aire, vacunación, líneas de emergencia y datos abiertos oficiales.',
+  keywords: ['salud', 'Medellín', 'Valle de Aburrá', 'IPS', 'vacunación', 'calidad del aire', 'SIATA', 'datos abiertos'],
+  manifest: '/manifest.json',
+  applicationName: 'MedellínBot Salud',
+  appleWebApp: { capable: true, title: 'MedellínBot', statusBarStyle: 'default' },
+  icons: { icon: '/icon.svg', apple: '/icon.svg' },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <html lang="es" suppressHydrationWarning>
-      <body>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <div className="flex flex-col min-h-screen relative z-10">
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#000000' },
+  ],
+  width: 'device-width',
+  initialScale: 1,
+};
 
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <html lang="es-CO" suppressHydrationWarning className={inter.variable}>
+      <body>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <a
+            href="#contenido"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-accent focus:px-4 focus:py-2 focus:text-white"
+          >
+            Saltar al contenido
+          </a>
+          <div className="flex min-h-dvh flex-col">
+            <Header />
+            <main id="contenido" className="flex-1">
+              {children}
+            </main>
+            <FooterGate>
+              <Footer />
+            </FooterGate>
+          </div>
         </ThemeProvider>
       </body>
     </html>

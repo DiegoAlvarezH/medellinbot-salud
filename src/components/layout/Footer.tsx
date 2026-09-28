@@ -1,140 +1,67 @@
-import { Heart, Mail, MapPin, Phone, FileText, Shield } from 'lucide-react';
 import Link from 'next/link';
+import { NAV_ITEMS } from '@/lib/config/navigation';
+
+const SOURCES = [
+  { href: 'https://www.datos.gov.co', label: 'Datos Abiertos Colombia' },
+  { href: 'https://medata.gov.co', label: 'MEData · Alcaldía de Medellín' },
+  { href: 'https://siata.gov.co', label: 'SIATA · Área Metropolitana' },
+  { href: 'https://open-meteo.com', label: 'Open-Meteo' },
+  { href: 'https://www.openstreetmap.org/copyright', label: 'OpenStreetMap' },
+];
 
 export function Footer() {
   return (
-    <footer className="border-t border-secondary-200 dark:border-secondary-800 bg-white dark:bg-secondary-950">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          {/* About */}
-          <div>
-            <h3 className="font-bold text-lg mb-4 text-secondary-900 dark:text-white">
-              MedellínBot Salud
-            </h3>
-            <p className="text-sm text-secondary-600 dark:text-secondary-300 leading-relaxed mb-4">
-              Tu asistente inteligente de salud pública para la ciudad de
-              Medellín. Información confiable y actualizada 24/7.
-            </p>
-            <div className="flex items-center gap-2 text-sm text-secondary-600 dark:text-secondary-300">
-              <Heart className="w-4 h-4 text-red-500" />
-              <span>Hecho con amor por UNAD</span>
-            </div>
-          </div>
+    <footer className="border-t border-separator bg-bg-secondary text-[12px] text-label-secondary">
+      <div className="container-page py-8">
+        <p className="border-b border-separator pb-4 leading-relaxed">
+          MedellínBot Salud ofrece información general de salud pública y{' '}
+          <strong className="font-semibold">no reemplaza la consulta médica</strong>. Ante una emergencia llama al{' '}
+          <a href="tel:123" className="font-semibold text-red">
+            123
+          </a>
+          . Los datos provienen de fuentes abiertas oficiales y pueden tener retrasos; verifica siempre con la institución.
+        </p>
 
-          {/* Quick Links */}
+        <div className="grid gap-6 py-6 sm:grid-cols-3">
           <div>
-            <h3 className="font-bold text-lg mb-4 text-secondary-900 dark:text-white">
-              Enlaces Rápidos
-            </h3>
-            <ul className="space-y-2">
+            <h2 className="mb-2 text-[12px] font-semibold text-label">Explorar</h2>
+            <ul className="space-y-1.5">
               <li>
-                <Link
-                  href="/"
-                  className="text-sm text-secondary-600 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                >
-                  Inicio
+                <Link href="/emergencias" className="hover:text-label hover:underline">
+                  Emergencias
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/chat"
-                  className="text-sm text-secondary-600 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                >
-                  Chat
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/mapa"
-                  className="text-sm text-secondary-600 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                >
-                  Mapa de Servicios
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/acerca"
-                  className="text-sm text-secondary-600 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                >
-                  Acerca de Nosotros
-                </Link>
-              </li>
+              {NAV_ITEMS.map((item) => (
+                <li key={item.href}>
+                  <Link href={item.href} className="hover:text-label hover:underline">
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
-
-          {/* Contact */}
           <div>
-            <h3 className="font-bold text-lg mb-4 text-secondary-900 dark:text-white">
-              Contacto
-            </h3>
-            <div className="space-y-3">
-              <div className="flex items-start gap-2">
-                <Mail className="w-4 h-4 mt-0.5 flex-shrink-0 text-secondary-600 dark:text-secondary-400" />
-                <a
-                  href="mailto:daalvarezherr@unadvirtual.edu.co"
-                  className="text-sm text-secondary-600 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                >
-                  daalvarezherr@unadvirtual.edu.co
-                </a>
-              </div>
-              <div className="flex items-start gap-2">
-                <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 text-secondary-600 dark:text-secondary-400" />
-                <span className="text-sm text-secondary-600 dark:text-secondary-300">
-                  Medellín, Colombia
-                </span>
-              </div>
-              <div className="flex items-start gap-2">
-                <Phone className="w-4 h-4 mt-0.5 flex-shrink-0 text-secondary-600 dark:text-secondary-400" />
-                <span className="text-sm text-secondary-600 dark:text-secondary-300">
-                  Emergencias: 123
-                </span>
-              </div>
-            </div>
+            <h2 className="mb-2 text-[12px] font-semibold text-label">Fuentes de datos</h2>
+            <ul className="space-y-1.5">
+              {SOURCES.map((source) => (
+                <li key={source.href}>
+                  <a href={source.href} target="_blank" rel="noreferrer" className="hover:text-label hover:underline">
+                    {source.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h2 className="mb-2 text-[12px] font-semibold text-label">Proyecto</h2>
+            <p className="leading-relaxed">Proyecto académico de la Universidad Nacional Abierta y a Distancia (UNAD).</p>
+            <a href="mailto:daalvarezherr@unadvirtual.edu.co" className="mt-1.5 inline-block text-link hover:underline">
+              daalvarezherr@unadvirtual.edu.co
+            </a>
           </div>
         </div>
 
-        {/* Disclaimer */}
-        <div className="border-t border-secondary-200 dark:border-secondary-800 pt-8 mb-6">
-          <div className="glass-panel rounded-2xl p-6 border border-yellow-200 dark:border-yellow-800/50">
-            <div className="flex items-start gap-3">
-              <Shield className="w-5 h-5 flex-shrink-0 mt-0.5 text-yellow-600 dark:text-yellow-400" />
-              <div>
-                <h4 className="font-bold text-sm mb-2 text-secondary-900 dark:text-white">
-                  Aviso Médico Importante
-                </h4>
-                <p className="text-xs text-secondary-700 dark:text-secondary-300 leading-relaxed">
-                  Este chatbot NO proporciona diagnósticos médicos ni reemplaza
-                  consultas con profesionales de la salud. La información es de
-                  carácter general y educativo. En emergencias, llame al 123.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Bar */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-6 border-t border-secondary-200 dark:border-secondary-800">
-          <p className="text-sm text-secondary-600 dark:text-secondary-400">
-            © {new Date().getFullYear()} MedellínBot Salud. Todos los derechos
-            reservados.
-          </p>
-          <div className="flex gap-6">
-            <Link
-              href="/privacidad"
-              className="text-sm text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors flex items-center gap-1"
-            >
-              <Shield className="w-3 h-3" />
-              Privacidad
-            </Link>
-            <Link
-              href="/terminos"
-              className="text-sm text-secondary-600 dark:text-secondary-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors flex items-center gap-1"
-            >
-              <FileText className="w-3 h-3" />
-              Términos
-            </Link>
-          </div>
-        </div>
+        <p className="border-t border-separator pt-4">© {new Date().getFullYear()} MedellínBot Salud</p>
       </div>
     </footer>
   );
