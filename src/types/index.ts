@@ -114,6 +114,8 @@ export interface ChatCards {
   services?: HealthService[];
   air?: Pick<AirQualitySnapshot, 'ica' | 'label' | 'level' | 'pm25' | 'updatedAt'>;
   emergency?: boolean;
+  /** Suggested next questions shown as chips under the answer. */
+  followUps?: string[];
 }
 
 export interface Conversation {

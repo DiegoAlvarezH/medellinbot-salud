@@ -3,12 +3,14 @@
 import dynamic from 'next/dynamic';
 import { useDeferredValue, useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { useTheme } from 'next-themes';
-import { Loader2, LocateFixed, Search } from 'lucide-react';
+import { Loader2, LocateFixed, Search, X } from 'lucide-react';
+import { ChipScroller } from '@/components/ui/chip-scroller';
 import { Segmented } from '@/components/ui/segmented';
 import { ServiceCard } from '@/components/services/ServiceCard';
-import { useGeolocation } from '@/hooks/use-geolocation';
+import { useLocation } from '@/components/location/LocationProvider';
 import { distanceMeters } from '@/lib/geo';
 import { isOpenAt } from '@/lib/opening-hours';
+import { isEmergencyCapable } from '@/lib/service-search';
 import { SERVICE_TYPE_META } from '@/lib/services-meta';
 import { cn } from '@/lib/utils';
 import type { HealthService, ServiceType } from '@/types';
@@ -54,7 +56,7 @@ export function MapExplorer() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [view, setView] = useState<'map' | 'list'>('map');
   const [limit, setLimit] = useState(PAGE);
-  const geo = useGeolocation();
+  const geo = useLocation();
   const { resolvedTheme } = useTheme();
   const hydrated = useSyncExternalStore(subscribeNoop, () => true, () => false);
   const deferredQuery = useDeferredValue(query);
@@ -78,7 +80,7 @@ export function MapExplorer() {
     const q = normalize(deferredQuery.trim());
     const list = services
       .filter((s) => {
-        if (filter === 'urgent' && !s.emergency) return false;
+        if (filter === 'urgent' && !isEmergencyCapable(s)) return false;
         if (filter !== 'all' && filter !== 'urgent' && s.type !== filter) return false;
         if (openNow && isOpenAt(s.hours) !== true) return false;
         if (q && !normalize(`${s.name} ${s.address ?? ''} ${s.neighborhood ?? ''} ${s.municipality ?? ''}`).includes(q)) return false;
@@ -115,7 +117,7 @@ export function MapExplorer() {
             className="h-10 w-full rounded-xl bg-fill pr-3 pl-9 text-[15px] outline-none placeholder:text-label-tertiary focus:ring-4 focus:ring-accent-soft"
           />
         </div>
-        <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4">
+        <ChipScroller ariaLabel="Filtrar por tipo de servicio" className="-mx-4">
           {FILTERS.map((f) => (
             <button
               key={f.value}
@@ -130,7 +132,7 @@ export function MapExplorer() {
               {f.label}
             </button>
           ))}
-        </div>
+        </ChipScroller>
         <div className="flex items-center justify-between gap-2">
           <label className="flex cursor-pointer items-center gap-2 text-[13px] text-label">
             <input
@@ -143,18 +145,20 @@ export function MapExplorer() {
           </label>
           <button
             type="button"
-            onClick={() => (geo.position ? geo.clear() : geo.locate())}
+            onClick={() => (geo.position ? geo.pause() : geo.locate())}
             className={cn(
               'inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[13px] font-medium',
               geo.position ? 'bg-accent text-white' : 'bg-accent-soft text-accent',
             )}
           >
             <LocateFixed className={cn('size-3.5', geo.status === 'locating' && 'animate-pulse')} />
-            {geo.position ? 'Ordenado por cercanía' : 'Cerca de mí'}
+            {geo.position ? 'Ordenado por cercanía' : geo.status === 'locating' ? 'Ubicando…' : 'Cerca de mí'}
           </button>
         </div>
         {geo.status === 'denied' && (
-          <p className="text-[12px] text-orange">Activa el permiso de ubicación en tu navegador para ordenar por cercanía.</p>
+          <p className="text-[12px] text-orange">
+            Bloqueaste la ubicación. Actívala desde el candado junto a la dirección del sitio para ordenar por cercanía.
+          </p>
         )}
       </div>
 
@@ -242,8 +246,16 @@ export function MapExplorer() {
             {filtered
               .filter((s) => s.id === selectedId)
               .map((s) => (
-                <div key={s.id} className="pointer-events-auto">
+                <div key={s.id} className="pointer-events-auto relative">
                   <ServiceCard service={s} className="shadow-float" />
+                  <button
+                    type="button"
+                    onClick={() => setSelectedId(null)}
+                    className="absolute top-3 right-3 grid size-7 place-items-center rounded-full bg-fill text-label-secondary hover:bg-fill-strong"
+                    aria-label="Cerrar"
+                  >
+                    <X className="size-4" />
+                  </button>
                 </div>
               ))}
           </div>

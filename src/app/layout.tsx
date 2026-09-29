@@ -4,6 +4,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { FooterGate } from '@/components/layout/FooterGate';
+import { LocationProvider } from '@/components/location/LocationProvider';
 import './globals.css';
 
 // Inter is only a fallback: Apple devices render SF Pro through the system font stack.
@@ -30,6 +31,9 @@ export const viewport: Viewport = {
   ],
   width: 'device-width',
   initialScale: 1,
+  viewportFit: 'cover',
+  // Mobile keyboards shrink the layout instead of covering the chat composer.
+  interactiveWidget: 'resizes-content',
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -43,6 +47,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           >
             Saltar al contenido
           </a>
+          <LocationProvider>
           <div className="flex min-h-dvh flex-col">
             <Header />
             <main id="contenido" className="flex-1">
@@ -52,6 +57,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               <Footer />
             </FooterGate>
           </div>
+          </LocationProvider>
         </ThemeProvider>
       </body>
     </html>

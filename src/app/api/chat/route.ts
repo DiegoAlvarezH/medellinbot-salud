@@ -69,15 +69,16 @@ function parseBody(body: unknown): { messages: IncomingMessage[]; location?: Lat
 
 // ─── Offline answer when no model is available ─────────────────────────────
 
-function fallbackAnswer({ summary, intents }: RetrievedContext, reason: string): string {
+function fallbackAnswer({ summary, intents }: RetrievedContext): string {
   const lead = intents.has('emergency') || intents.has('mental-health') ? '**Si es una emergencia, llama ya al 123.**\n\n' : '';
-  const body = summary.length
-    ? `Esto es lo que encontré en los datos abiertos:\n\n${summary
-        .slice(0, 7)
-        .map((line) => `- ${line}`)
-        .join('\n')}`
-    : 'Puedo ayudarte con centros de salud, calidad del aire, vacunación y líneas de ayuda. Prueba, por ejemplo: "farmacias abiertas en Laureles".';
-  return `${lead}${body}\n\n_Modo básico: el asistente con IA no está disponible (${reason})._`;
+  if (!summary.length) {
+    return `${lead}Puedo ayudarte con centros de salud, calidad del aire, vacunación y líneas de ayuda. Prueba, por ejemplo: "farmacias abiertas en Laureles".`;
+  }
+  const bullets = summary
+    .slice(0, 7)
+    .map((line) => `- ${line}`)
+    .join('\n');
+  return `${lead}Esto es lo que encontré en los datos abiertos:\n\n${bullets}`;
 }
 
 function encode(event: ChatStreamEvent): Uint8Array {
@@ -107,7 +108,8 @@ export async function POST(request: Request) {
       const send = (event: ChatStreamEvent) => controller.enqueue(encode(event));
       let retrieved: RetrievedContext;
       try {
-        retrieved = await retrieveContext(query, location);
+        const previousQueries = messages.slice(0, -1).filter((m) => m.role === 'user').map((m) => m.content).slice(-3);
+        retrieved = await retrieveContext(query, location, previousQueries);
       } catch (error) {
         console.error('[api/chat] retrieval', error);
         retrieved = { intents: new Set(), context: '- Línea única de emergencias: 123 (24 horas).', summary: [], cards: {} };
@@ -115,7 +117,7 @@ export async function POST(request: Request) {
 
       if (!apiKey) {
         send({ type: 'meta', cards: retrieved.cards, source: 'fallback' });
-        send({ type: 'delta', text: fallbackAnswer(retrieved, 'falta configurar OPENAI_API_KEY') });
+        send({ type: 'delta', text: fallbackAnswer(retrieved) });
         send({ type: 'done' });
         controller.close();
         return;
@@ -149,15 +151,9 @@ export async function POST(request: Request) {
         }
         const { status, code } = error as { status?: number; code?: string };
         console.error('[api/chat] openai', status ?? '', code ?? '', (error as Error).message);
-        const reason =
-          status === 401
-            ? 'la clave de OpenAI no es válida'
-            : code === 'insufficient_quota' || code === 'credit_balance_exhausted'
-              ? 'la cuenta de OpenAI no tiene créditos disponibles'
-              : status === 429
-                ? 'se alcanzó el límite de uso del modelo'
-                : 'error temporal del proveedor';
-        send({ type: 'delta', text: fallbackAnswer(retrieved, reason) });
+        // The reason (no credits, bad key, outage) is an operator concern: it stays in the server log.
+        send({ type: 'meta', cards: retrieved.cards, source: 'fallback' });
+        send({ type: 'delta', text: fallbackAnswer(retrieved) });
       }
       send({ type: 'done' });
       controller.close();

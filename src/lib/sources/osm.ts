@@ -36,6 +36,11 @@ const PUBLIC_NETWORK = /metrosalud|\bE\.?\s?S\.?\s?E\.?\b|empresa social del est
 function classify(tags: Record<string, string>, name: string): ServiceType {
   const amenity = tags.amenity;
   const healthcare = tags.healthcare;
+  // The name is more reliable than the tag: many drugstores and labs are mapped as clinics or hospitals.
+  const n = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  if (/\b(droguer|drogeria|farmacia|pharma)/.test(n)) return 'pharmacy';
+  if (/\blaboratorio\b/.test(n) && !/\b(hospital|clinica)\b/.test(n)) return 'laboratory';
+  if (/\b(odontolog|dental|dentix|ortodonc)/.test(n)) return 'dentist';
   if (amenity === 'hospital' || healthcare === 'hospital') return 'hospital';
   if (amenity === 'pharmacy' || healthcare === 'pharmacy') return 'pharmacy';
   if (amenity === 'dentist' || healthcare === 'dentist') return 'dentist';
@@ -86,7 +91,8 @@ export function mapOverpass(elements: OverpassElement[]): HealthService[] {
       phone: tags.phone ?? tags['contact:phone'],
       website: tags.website ?? tags['contact:website'],
       hours: tags.opening_hours,
-      emergency: tags.emergency === 'yes' || (type === 'hospital' && tags.emergency !== 'no') || undefined,
+      // Only an explicit tag counts: many "hospitals" in OSM are outpatient sites without urgencias.
+      emergency: tags.emergency === 'yes' || undefined,
       isPublic: tags.operator_type === 'public' || tags['operator:type'] === 'public' || PUBLIC_NETWORK.test(`${name} ${tags.operator ?? ''}`) || undefined,
       source: 'osm',
     });
