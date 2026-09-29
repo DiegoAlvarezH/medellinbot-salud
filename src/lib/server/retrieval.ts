@@ -1,6 +1,6 @@
 import 'server-only';
 import { aqiCategory, uvCategory } from '@/lib/air-quality';
-import { distanceMeters, formatDistance, type LatLng } from '@/lib/geo';
+import { formatDistance, type LatLng } from '@/lib/geo';
 import { formatHours, isOpenAt } from '@/lib/opening-hours';
 import { formatPhone } from '@/lib/phone';
 import { SERVICE_TYPE_META } from '@/lib/services-meta';
@@ -10,7 +10,8 @@ import { getAirQuality } from '@/lib/server/environment';
 import { getHealthNetwork, getPlaces, getReps } from '@/lib/server/health-network';
 import { getIndicators } from '@/lib/server/indicators';
 import { getWeather } from '@/lib/server/sources/open-meteo';
-import type { ChatCards, HealthService, Place, ServiceType } from '@/types';
+import { searchServices } from '@/lib/service-search';
+import type { ChatCards, HealthService } from '@/types';
 
 export type Intent =
   | 'emergency'
@@ -27,7 +28,7 @@ const INTENT_PATTERNS: Record<Intent, RegExp> = {
   emergency:
     /\b(emergencia|urgente|infarto|no (puede|puedo) respirar|ahog|convuls|desmay|inconscien|sangr(a|ado) (mucho|abundante)|accidente|derrame|acv|dolor (fuerte )?(en el|de) pecho|envenen|intoxica)/,
   services:
-    /\b(hospital|cl[ií]nica|urgencias?|farmacia|droguer[ií]a|centro de salud|ips|metrosalud|odont|dentist|laborator|m[eé]dico|consultorio|d[oó]nde|cerca|cercan|atender|atenci[oó]n|pediatr|ginec|vacunator|abiert)/,
+    /\b(hospital|cl[ií]nica|urgencias?|farmacia|droguer[ií]a|medicamento|centro de salud|ips|metrosalud|odont|dentist|muela|diente|laborator|examen|m[eé]dico|consultorio|d[oó]nde|cerca|cercan|atender|atienden|atenci[oó]n|pediatr|ginec|obstetr|psic[oó]log|psiquiatr|oftalm|dermat|cardi[oó]log|oncol|fisioterap|vacunator|abiert)/,
   air: /\b(aire|contamina|pm ?2|pm ?10|ica\b|smog|siata|correr|ejercicio|bicicleta|respirar|asma|tapabocas|pico y placa ambiental)/,
   weather: /\b(clima|lluvia|llover|sol\b|uv|bloqueador|protector solar|calor|temperatura|fr[ií]o)/,
   vaccination: /\b(vacun|esquema|pai\b|refuerzo|dosis|carn[eé])/,
@@ -51,15 +52,6 @@ export function detectIntents(query: string): Set<Intent> {
   return intents;
 }
 
-function wantedTypes(q: string): ServiceType[] | null {
-  if (/farmacia|droguer/.test(q)) return ['pharmacy'];
-  if (/odont|dentist|muela|diente/.test(q)) return ['dentist'];
-  if (/laborator|examen(es)? de sangre/.test(q)) return ['laboratory'];
-  if (/urgencia|emergencia|hospital/.test(q)) return ['hospital', 'health-center', 'clinic'];
-  if (/centro de salud|metrosalud|vacunator|vacun/.test(q)) return ['health-center'];
-  return null;
-}
-
 const PLACE_STOPWORDS = new Set(
   'hola quiero necesito donde cerca cercano cercana cual cuales como para una un el la los las de del en que hay por favor mas salud centro hospital clinica farmacia urgencias ahora abierta abierto hoy barrio comuna medellin'.split(' '),
 );
@@ -75,79 +67,6 @@ function describeService(s: HealthService): string {
     s.transit && `Estación de Metro/Metrocable más cercana: ${s.transit.name} (${formatDistance(s.transit.distance)})`,
   ];
   return `- ${parts.filter(Boolean).join(' | ')}`;
-}
-
-/** Names too generic to be read as a place ("centro de salud" is not the Centro barrio). */
-const AMBIGUOUS_PLACES = new Set(['centro', 'la salud', 'hospital', 'el hospital', 'la iguana', 'popular']);
-
-/** Longest barrio / comuna / municipality name mentioned in the question, if any. */
-async function resolvePlace(q: string): Promise<Place | undefined> {
-  const places = await getPlaces().catch(() => [] as Place[]);
-  // Compare on letters and digits only, padded with spaces, so matches are whole words.
-  const words = (text: string) => ` ${fold(text).replace(/[^a-z0-9]+/g, ' ').trim()} `;
-  const haystack = words(q);
-  let best: { place: Place; length: number } | undefined;
-  for (const place of places) {
-    const name = words(place.name);
-    if (name.length < 6 || AMBIGUOUS_PLACES.has(name.trim())) continue;
-    if (haystack.includes(name) && (!best || name.length > best.length)) best = { place, length: name.length };
-  }
-  return best?.place;
-}
-
-async function findServices(query: string, location?: LatLng): Promise<{ services: HealthService[]; place?: Place }> {
-  const q = fold(query);
-  const { services } = await getHealthNetwork();
-  const types = wantedTypes(q);
-  let pool = types ? services.filter((s) => types.includes(s.type)) : services.filter((s) => s.type !== 'pharmacy');
-  if (/abiert|ahora|24 ?h/.test(q)) {
-    const open = pool.filter((s) => isOpenAt(s.hours) === true);
-    if (open.length >= 3) pool = open;
-  }
-
-  if (location) {
-    return {
-      services: pool
-        .map((s) => ({ ...s, distance: distanceMeters(location, s) }))
-        .sort((a, b) => a.distance - b.distance)
-        .slice(0, 6),
-    };
-  }
-
-  // A named barrio or municipality ranks by distance to its centroid.
-  const place = await resolvePlace(q);
-  if (place) {
-    return {
-      place,
-      services: pool
-        .map((s) => ({ s, d: distanceMeters(place, s) }))
-        .filter((x) => x.d < 2500)
-        .sort((a, b) => a.d - b.d)
-        .slice(0, 6)
-        .map((x) => x.s),
-    };
-  }
-
-  // Without GPS, rank by how well the question names a place (barrio, comuna, municipio) or the facility.
-  const words = q.replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter((w) => w.length > 3 && !PLACE_STOPWORDS.has(w));
-  if (words.length) {
-    const scored = pool
-      .map((s) => {
-        const haystack = fold(`${s.name} ${s.neighborhood ?? ''} ${s.municipality ?? ''} ${s.address ?? ''}`);
-        return { s, score: words.filter((w) => haystack.includes(w)).length };
-      })
-      .filter((x) => x.score > 0)
-      .sort((a, b) => b.score - a.score);
-    if (scored.length) return { services: scored.slice(0, 6).map((x) => x.s) };
-  }
-
-  // Generic question: prefer the public network and facilities with a phone number.
-  return {
-    services: pool
-      .filter((s) => s.isPublic || s.phone)
-      .sort((a, b) => Number(Boolean(b.isPublic)) - Number(Boolean(a.isPublic)))
-      .slice(0, 6),
-  };
 }
 
 async function searchReps(query: string): Promise<string[]> {
@@ -177,8 +96,31 @@ export interface RetrievedContext {
   cards: ChatCards;
 }
 
-export async function retrieveContext(query: string, location?: LatLng): Promise<RetrievedContext> {
+/** Follow-up questions ("¿y en Envigado?", "¿cuál está abierto?") keep the previous topic. */
+function isFollowUp(query: string): boolean {
+  const q = fold(query).trim();
+  return q.split(/\s+/).length <= 6 && /^(y|e|pero|entonces|cual|cuales|alguno|alguna|otro|otra|mas|y si)\b|abiert|cerca|en [a-z]/.test(q);
+}
+
+function followUpsFor(intents: Set<Intent>, hasLocation: boolean): string[] {
+  const out: string[] = [];
+  if (intents.has('services')) {
+    out.push('¿Cuál está abierto ahora?');
+    out.push(hasLocation ? '¿Cómo llego en transporte público?' : '¿Y en Envigado?');
+  }
+  if (intents.has('air')) out.push('¿Qué estación tiene peor aire?', '¿Puedo sacar a mi bebé?');
+  if (intents.has('weather') && !intents.has('air')) out.push('¿A qué hora es más fuerte el sol?');
+  if (intents.has('vaccination')) out.push('¿Dónde me puedo vacunar cerca?');
+  if (intents.has('mental-health')) out.push('¿Dónde hay atención psicológica cerca?');
+  if (intents.has('indicators')) out.push('¿Cómo prevengo el dengue?');
+  if (!out.length) out.push('Urgencias cerca de mí', '¿Cómo está el aire hoy?');
+  return out.slice(0, 3);
+}
+
+export async function retrieveContext(query: string, location?: LatLng, previousQueries: string[] = []): Promise<RetrievedContext> {
   const intents = detectIntents(query);
+  const previousIntents = previousQueries.length ? detectIntents(previousQueries[previousQueries.length - 1]) : new Set<Intent>();
+  if (!intents.has('services') && previousIntents.has('services') && isFollowUp(query)) intents.add('services');
   const sections: string[] = [];
   const summary: string[] = [];
   const cards: ChatCards = {};
@@ -195,9 +137,17 @@ export async function retrieveContext(query: string, location?: LatLng): Promise
 
   if (intents.has('services')) {
     tasks.push(
-      findServices(query, location).then(({ services, place }) => {
+      Promise.all([getHealthNetwork(), getPlaces().catch(() => [])]).then(([network, places]) => {
+        const { services, place, ordering, plan } = searchServices({ services: network.services, places, query, previousQueries, location });
         if (!services.length) return;
-        if (place) sections.push(`Lugar mencionado: ${place.name} (resultados ordenados por cercanía a ese sector).`);
+        sections.push(
+          ordering === 'user-location'
+            ? 'Resultados ordenados por distancia a la ubicación actual del usuario.'
+            : ordering === 'place'
+              ? `Lugar mencionado: ${place!.name}. Resultados ordenados por cercanía a ese sector.`
+              : 'El usuario NO compartió ubicación ni barrio: las opciones están repartidas por la ciudad. Pídele su barrio o que permita la ubicación para recomendar lo más cercano.',
+        );
+        if (plan.specialty) sections.push(`Especialidad buscada: ${plan.specialty.label}. Los primeros resultados la mencionan en su nombre; los demás son servicios generales que pueden remitir. Recomienda confirmar la agenda por teléfono.`);
         cards.services = services.slice(0, 4);
         summary.push(
           ...services.slice(0, 4).map((s) => {
@@ -297,5 +247,6 @@ export async function retrieveContext(query: string, location?: LatLng): Promise
       .map((l) => `**${l.name}:** ${l.number}${l.kind === 'whatsapp' ? ' (WhatsApp)' : ''}`),
   );
 
+  cards.followUps = followUpsFor(intents, Boolean(location));
   return { intents, context: sections.join('\n\n'), summary, cards };
 }

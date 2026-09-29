@@ -1,7 +1,7 @@
 'use client';
 
 import 'leaflet/dist/leaflet.css';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { CircleMarker, MapContainer, TileLayer, Tooltip, useMap } from 'react-leaflet';
 import { SERVICE_TYPE_META } from '@/lib/services-meta';
 import type { LatLng } from '@/lib/geo';
@@ -17,6 +17,18 @@ interface MapViewProps {
   dark: boolean;
 }
 
+/** Centres the map on the user once, the first time the position arrives. */
+function CenterOnUserOnce({ lat, lng }: { lat?: number; lng?: number }) {
+  const map = useMap();
+  const done = useRef(false);
+  useEffect(() => {
+    if (done.current || lat === undefined || lng === undefined) return;
+    done.current = true;
+    map.flyTo([lat, lng], Math.max(map.getZoom(), 15), { duration: 0.8 });
+  }, [map, lat, lng]);
+  return null;
+}
+
 /** Flies to a point whenever its coordinates change (primitive deps, so re-renders don't retrigger it). */
 function FlyTo({ lat, lng, zoom }: { lat?: number; lng?: number; zoom: number }) {
   const map = useMap();
@@ -29,7 +41,6 @@ function FlyTo({ lat, lng, zoom }: { lat?: number; lng?: number; zoom: number })
 /** Canvas-rendered map so a few thousand markers stay smooth on phones. */
 export default function MapView({ services, selectedId, onSelect, userPosition, dark }: MapViewProps) {
   const selected = services.find((s) => s.id === selectedId) ?? null;
-  const target = selected ?? userPosition;
 
   return (
     <MapContainer center={MEDELLIN} zoom={13} preferCanvas zoomControl className="size-full" aria-label="Mapa de servicios de salud">
@@ -68,7 +79,8 @@ export default function MapView({ services, selectedId, onSelect, userPosition, 
           </Tooltip>
         </CircleMarker>
       )}
-      <FlyTo lat={target?.latitude} lng={target?.longitude} zoom={selected ? 16 : 14} />
+      <FlyTo lat={selected?.latitude} lng={selected?.longitude} zoom={16} />
+      <CenterOnUserOnce lat={userPosition?.latitude} lng={userPosition?.longitude} />
     </MapContainer>
   );
 }
