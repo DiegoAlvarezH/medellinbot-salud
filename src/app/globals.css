@@ -1,127 +1,245 @@
-/* Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
-
 @import "tailwindcss";
 
-@theme {
-  --font-family-sans: 'Outfit', system-ui, -apple-system, sans-serif;
-  --font-family-heading: 'Space Grotesk', 'Outfit', system-ui, sans-serif;
+/* next-themes toggles the `dark` class on <html>; Tailwind v4 defaults to prefers-color-scheme. */
+@custom-variant dark (&:where(.dark, .dark *));
 
-  /* Bold & Refined Palette - Zin & Emerald */
-  --color-primary-50: #f0fdf9;
-  --color-primary-100: #ccfbf1;
-  --color-primary-200: #99f6e4;
-  --color-primary-300: #5eead4;
-  --color-primary-400: #2dd4bf;
-  --color-primary-500: #14b8a6;
-  --color-primary-600: #0d9488;
-  --color-primary-700: #0f766e;
-  --color-primary-800: #115e59;
-  --color-primary-900: #134e4a;
-  --color-primary-950: #042f2e;
-
-  --color-secondary-50: #fafafa;
-  --color-secondary-100: #f4f4f5;
-  --color-secondary-200: #e4e4e7;
-  --color-secondary-300: #d4d4d8;
-  --color-secondary-400: #a1a1aa;
-  --color-secondary-500: #71717a;
-  --color-secondary-600: #52525b;
-  --color-secondary-700: #3f3f46;
-  --color-secondary-800: #27272a;
-  --color-secondary-900: #18181b;
-  --color-secondary-950: #09090b;
-
-  --color-accent-50: #f0f9ff;
-  --color-accent-100: #e0f2fe;
-  --color-accent-200: #bae6fd;
-  --color-accent-300: #7dd3fc;
-  --color-accent-400: #38bdf8;
-  --color-accent-500: #0ea5e9;
-  --color-accent-600: #0284c7;
-  --color-accent-700: #0369a1;
-  --color-accent-800: #075985;
-  --color-accent-900: #0c4a6e;
-  
-  --radius-xl: 1rem;
-  --radius-2xl: 1.5rem;
-  --radius-3xl: 2rem;
+/*
+ * Design tokens — inspired by Apple's Human Interface Guidelines:
+ * neutral surfaces, one accent color, semantic system colors and generous radii.
+ */
+:root {
+  --bg: #ffffff;
+  --bg-secondary: #f5f5f7;
+  --bg-elevated: #ffffff;
+  --bg-grouped: #f5f5f7;
+  --fill: rgba(120, 120, 128, 0.12);
+  --fill-strong: rgba(120, 120, 128, 0.2);
+  --label: #1d1d1f;
+  --label-secondary: #6e6e73;
+  --label-tertiary: #86868b;
+  --separator: rgba(0, 0, 0, 0.1);
+  --accent: #0071e3;
+  --accent-hover: #0077ed;
+  --accent-soft: rgba(0, 113, 227, 0.1);
+  --link: #0066cc;
+  --green: #28a745;
+  --green-soft: rgba(52, 199, 89, 0.14);
+  --red: #e30000;
+  --red-soft: rgba(255, 59, 48, 0.12);
+  --orange: #e67300;
+  --orange-soft: rgba(255, 149, 0, 0.14);
+  --yellow: #b38600;
+  --yellow-soft: rgba(255, 204, 0, 0.18);
+  --purple: #9b3fd1;
+  --purple-soft: rgba(175, 82, 222, 0.12);
+  --teal: #00829b;
+  --teal-soft: rgba(48, 176, 199, 0.14);
+  --nav-bg: rgba(255, 255, 255, 0.72);
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-float: 0 12px 40px rgba(0, 0, 0, 0.12);
 }
 
-@layer utilities {
-  .glass-panel {
-    @apply bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-white/20 dark:border-zinc-700/50 shadow-xl;
+.dark {
+  --bg: #000000;
+  --bg-secondary: #161617;
+  --bg-elevated: #1c1c1e;
+  --bg-grouped: #0b0b0c;
+  --fill: rgba(120, 120, 128, 0.24);
+  --fill-strong: rgba(120, 120, 128, 0.36);
+  --label: #f5f5f7;
+  --label-secondary: #a1a1a6;
+  --label-tertiary: #86868b;
+  --separator: rgba(255, 255, 255, 0.12);
+  --accent: #0a84ff;
+  --accent-hover: #409cff;
+  --accent-soft: rgba(10, 132, 255, 0.18);
+  --link: #2997ff;
+  --green: #30d158;
+  --green-soft: rgba(48, 209, 88, 0.18);
+  --red: #ff453a;
+  --red-soft: rgba(255, 69, 58, 0.18);
+  --orange: #ff9f0a;
+  --orange-soft: rgba(255, 159, 10, 0.18);
+  --yellow: #ffd60a;
+  --yellow-soft: rgba(255, 214, 10, 0.16);
+  --purple: #bf5af2;
+  --purple-soft: rgba(191, 90, 242, 0.18);
+  --teal: #40c8e0;
+  --teal-soft: rgba(64, 200, 224, 0.16);
+  --nav-bg: rgba(22, 22, 23, 0.72);
+  --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --shadow-float: 0 12px 40px rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-inter), "Segoe UI", system-ui, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", var(--font-inter), "Segoe UI", system-ui, sans-serif;
+
+  --color-bg: var(--bg);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-bg-grouped: var(--bg-grouped);
+  --color-fill: var(--fill);
+  --color-fill-strong: var(--fill-strong);
+  --color-label: var(--label);
+  --color-label-secondary: var(--label-secondary);
+  --color-label-tertiary: var(--label-tertiary);
+  --color-separator: var(--separator);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-link: var(--link);
+  --color-green: var(--green);
+  --color-green-soft: var(--green-soft);
+  --color-red: var(--red);
+  --color-red-soft: var(--red-soft);
+  --color-orange: var(--orange);
+  --color-orange-soft: var(--orange-soft);
+  --color-yellow: var(--yellow);
+  --color-yellow-soft: var(--yellow-soft);
+  --color-purple: var(--purple);
+  --color-purple-soft: var(--purple-soft);
+  --color-teal: var(--teal);
+  --color-teal-soft: var(--teal-soft);
+
+  --shadow-card: var(--shadow-card);
+  --shadow-float: var(--shadow-float);
+
+  --radius-card: 1.25rem;
+  --radius-tile: 1.75rem;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
   }
 
-  .bg-gradient-subtle {
-    @apply bg-linear-to-b from-secondary-50 to-white dark:from-secondary-950 dark:to-black;
+  body {
+    @apply bg-bg text-label font-sans antialiased;
+    font-feature-settings: "kern";
+    text-rendering: optimizeLegibility;
   }
 
-  .section-bg-light {
-    @apply bg-secondary-50/50 dark:bg-secondary-900/20;
-  }
-  
-  .gradient-text {
-    @apply bg-clip-text text-transparent bg-linear-to-r from-primary-600 to-accent-600 dark:from-primary-400 dark:to-accent-400;
+  h1, h2, h3, h4 {
+    @apply font-display text-balance;
+    letter-spacing: -0.022em;
   }
 
-  .card-hover {
-    @apply transition-all duration-300 hover:shadow-2xl hover:-translate-y-1;
+  ::selection {
+    background: var(--accent-soft);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 6px;
   }
 }
 
-body {
-  font-family: var(--font-family-sans);
-  background-color: var(--color-secondary-50);
-  color: var(--color-secondary-900);
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
-  @apply antialiased selection:bg-primary-500 selection:text-white;
+@layer components {
+  /* Frosted-glass surface used by the nav bar and floating panels. */
+  .glass {
+    background: var(--nav-bg);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+  }
+
+  .container-page {
+    @apply mx-auto w-full max-w-[1080px] px-4 sm:px-6;
+  }
+
+  .eyebrow {
+    @apply text-[13px] font-semibold uppercase tracking-[0.08em] text-label-secondary;
+  }
+
+  .headline {
+    @apply font-display text-[40px] leading-[1.08] font-semibold tracking-[-0.03em] sm:text-[56px] lg:text-[64px];
+  }
+
+  .title-section {
+    @apply font-display text-[32px] leading-[1.1] font-semibold tracking-[-0.025em] sm:text-[40px];
+  }
+
+  .lede {
+    @apply text-[19px] leading-[1.45] text-label-secondary sm:text-[21px];
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--fill-strong) transparent;
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Markdown inside chat answers. */
+  .prose-chat {
+    @apply text-[15px] leading-[1.55];
+  }
+  .prose-chat p + p,
+  .prose-chat p + ul,
+  .prose-chat ul + p,
+  .prose-chat p + ol,
+  .prose-chat ol + p {
+    @apply mt-2.5;
+  }
+  .prose-chat ul {
+    @apply list-disc pl-5 space-y-1;
+  }
+  .prose-chat ol {
+    @apply list-decimal pl-5 space-y-1;
+  }
+  .prose-chat strong {
+    @apply font-semibold;
+  }
+  .prose-chat a {
+    @apply text-link underline-offset-2 hover:underline;
+  }
+  .prose-chat h3,
+  .prose-chat h4 {
+    @apply mt-3 mb-1 text-[15px] font-semibold;
+  }
+  .prose-chat code {
+    @apply rounded bg-fill px-1 py-0.5 text-[13px];
+  }
 }
 
-main {
-  position: relative;
+/* Leaflet overrides so the map matches the rest of the interface. */
+.leaflet-container {
+  font-family: var(--font-sans);
+  background: var(--bg-secondary);
 }
-
-main::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(circle at 15% 10%, rgba(20, 184, 166, 0.08), transparent 40%),
-    radial-gradient(circle at 85% 0%, rgba(14, 165, 233, 0.07), transparent 45%);
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: var(--bg-elevated);
+  color: var(--label);
+  box-shadow: var(--shadow-float);
 }
-
-.dark body {
-  background-color: var(--color-secondary-950);
-  color: var(--color-secondary-50);
+.leaflet-popup-content-wrapper {
+  border-radius: 14px;
 }
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-family-heading);
-  letter-spacing: -0.03em;
+.leaflet-control-zoom a {
+  background: var(--bg-elevated) !important;
+  color: var(--label) !important;
+  border-color: var(--separator) !important;
 }
-
-:focus-visible {
-  outline: 2px solid var(--color-primary-500);
-  outline-offset: 2px;
+.leaflet-control-attribution {
+  background: var(--nav-bg) !important;
+  color: var(--label-secondary) !important;
+  font-size: 10px;
 }
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+.leaflet-control-attribution a {
+  color: var(--link) !important;
 }
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  @apply bg-secondary-300 dark:bg-secondary-700 rounded-full;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-secondary-400 dark:bg-secondary-600;
+/* Standard OSM tiles have no dark style: invert them and restore hues. */
+.map-tiles-dark {
+  filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) saturate(0.5);
 }
 
 @media (prefers-reduced-motion: reduce) {
