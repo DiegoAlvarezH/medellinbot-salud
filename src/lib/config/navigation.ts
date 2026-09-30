@@ -9,6 +9,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: '/mapa', label: 'Mapa', description: 'Centros de salud y farmacias cerca de ti' },
   { href: '/aire', label: 'Aire y clima', description: 'Calidad del aire, UV y recomendaciones' },
   { href: '/vacunacion', label: 'Vacunación', description: 'Esquema nacional por edad' },
+  { href: '/medicamentos', label: 'Medicamentos', description: 'Registro INVIMA, venta libre y precio regulado' },
   { href: '/indicadores', label: 'Indicadores', description: 'Datos abiertos de salud pública' },
   { href: '/acerca', label: 'Acerca', description: 'Fuentes, metodología y aviso legal' },
 ];
