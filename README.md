@@ -31,7 +31,7 @@ Todas son públicas y no requieren API key. Detalle de endpoints y campos en [`d
 
 ## Puesta en marcha
 
-Requisitos: Node.js 20+ y pnpm.
+Requisitos: Node.js 22+ y pnpm.
 
 ```bash
 pnpm install
