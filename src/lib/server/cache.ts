@@ -1,4 +1,5 @@
 import 'server-only';
+import { USER_AGENT } from '@/lib/config/site';
 
 interface Entry<T> {
   value: T;
@@ -45,7 +46,7 @@ export async function fetchJson<T>(url: string, init: RequestInit & { timeoutMs?
     signal: AbortSignal.timeout(timeoutMs),
     headers: {
       Accept: 'application/json',
-      'User-Agent': 'MedellinBotSalud/2.0 (proyecto academico UNAD; daalvarezherr@unadvirtual.edu.co)',
+      'User-Agent': USER_AGENT,
       ...headers,
     },
   });

@@ -2,13 +2,17 @@
   "name": "medellinbot-salud",
   "version": "2.0.0",
   "private": true,
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "type-check": "tsc --noEmit",
-    "data:sync": "tsx scripts/sync-data.ts"
+    "data:sync": "tsx scripts/sync-data.ts",
+    "test": "tsx --test \"test/**/*.test.ts\""
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",

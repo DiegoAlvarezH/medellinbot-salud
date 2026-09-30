@@ -57,7 +57,7 @@ export function Header() {
           <span className="text-[15px] font-semibold tracking-[-0.01em]">MedellínBot</span>
         </Link>
 
-        <nav aria-label="Principal" className="hidden items-center gap-0.5 md:flex">
+        <nav aria-label="Principal" className="hidden items-center gap-0.5 lg:flex">
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.href}
@@ -84,7 +84,7 @@ export function Header() {
           <ThemeToggle />
           <button
             type="button"
-            className="grid size-8 place-items-center rounded-full text-label hover:bg-fill md:hidden"
+            className="grid size-8 place-items-center rounded-full text-label hover:bg-fill lg:hidden"
             onClick={() => setOpen((value) => !value)}
             aria-expanded={open}
             aria-controls="menu-movil"
@@ -104,7 +104,7 @@ export function Header() {
             animate={{ opacity: 1, height: 'calc(100dvh - 3rem)' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
-            className="overflow-y-auto bg-bg md:hidden"
+            className="overflow-y-auto bg-bg lg:hidden"
           >
             <ul className="container-page pt-2 pb-10">
               {MOBILE_ITEMS.map((item, index) => (

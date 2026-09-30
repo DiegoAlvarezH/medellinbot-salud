@@ -3,13 +3,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowDown, Baby, Brain, Hospital, MessageSquarePlus, PanelLeft, Pill, Syringe, Trash2, Wind, X } from 'lucide-react';
+import { ArrowDown, Baby, Brain, Check, Hospital, MessageSquarePlus, PanelLeft, Pill, Search, Share, Syringe, Trash2, Wind, X } from 'lucide-react';
 import { Composer, type ComposerHandle } from '@/components/chat/Composer';
 import { MessageBubble, TypingDots } from '@/components/chat/MessageBubble';
 import { LocationPill } from '@/components/location/LocationPill';
 import { useLocation } from '@/components/location/LocationProvider';
 import { Aurora } from '@/components/ui/aurora';
 import { useConversations } from '@/hooks/use-conversations';
+import { useReadAloud } from '@/hooks/use-speech';
 import { cn } from '@/lib/utils';
 import type { ChatMessage, ChatStreamEvent, Conversation } from '@/types';
 
@@ -48,6 +49,9 @@ export function ChatView() {
   const [streamingId, setStreamingId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [atBottom, setAtBottom] = useState(true);
+  const [historyQuery, setHistoryQuery] = useState('');
+  const [shared, setShared] = useState(false);
+  const readAloud = useReadAloud();
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const composerRef = useRef<ComposerHandle>(null);
@@ -69,14 +73,16 @@ export function ChatView() {
     if (el) setAtBottom(el.scrollHeight - el.scrollTop - el.clientHeight < 80);
   };
 
+  /** Sends `text` after `base` (defaults to the current thread; regenerate passes the thread without the last turn). */
   const send = useCallback(
-    async (text: string) => {
+    async (text: string, base?: ChatMessage[]) => {
       if (busy) return;
+      readAloud.stop();
       const conversationId = activeId ?? newId();
       if (!activeId) setActiveId(conversationId);
 
       const userMessage: ChatMessage = { id: newId(), role: 'user', content: text, createdAt: new Date().toISOString() };
-      const history = [...messages, userMessage];
+      const history = [...(base ?? messages), userMessage];
       let assistant: ChatMessage = { id: newId(), role: 'assistant', content: '', createdAt: new Date().toISOString() };
 
       setMessages([...history, assistant]);
@@ -139,8 +145,32 @@ export function ChatView() {
         upsert(conversationId, [...history, assistant]);
       }
     },
-    [activeId, busy, location.position, messages, setActiveId, upsert],
+    [activeId, busy, location.position, messages, readAloud, setActiveId, upsert],
   );
+
+  const regenerate = () => {
+    const lastUserIndex = messages.map((m) => m.role).lastIndexOf('user');
+    if (lastUserIndex < 0 || busy) return;
+    void send(messages[lastUserIndex].content, messages.slice(0, lastUserIndex));
+  };
+
+  /** Shares the conversation as plain text (native share sheet on phones, clipboard elsewhere). */
+  const share = async () => {
+    const transcript = messages
+      .map((m) => `${m.role === 'user' ? 'Tú' : 'MedellínBot'}: ${m.content.trim()}`)
+      .join('\n\n');
+    const text = `${transcript}\n\n— MedellínBot Salud · información general, no reemplaza la consulta médica.`;
+    try {
+      if (navigator.share) await navigator.share({ title: 'Conversación con MedellínBot Salud', text });
+      else {
+        await navigator.clipboard.writeText(text);
+        setShared(true);
+        setTimeout(() => setShared(false), 1800);
+      }
+    } catch {
+      // The person closed the share sheet: nothing to do.
+    }
+  };
 
   // Deep links such as /chat?q=… start the conversation right away.
   useEffect(() => {
@@ -153,6 +183,7 @@ export function ChatView() {
 
   const startNew = () => {
     abortRef.current?.abort();
+    readAloud.stop();
     setActiveId(null);
     setMessages([]);
     setSidebarOpen(false);
@@ -163,6 +194,7 @@ export function ChatView() {
     const conversation = conversations.find((c) => c.id === id);
     if (!conversation) return;
     abortRef.current?.abort();
+    readAloud.stop();
     setActiveId(id);
     setMessages(conversation.messages);
     setSidebarOpen(false);
@@ -170,6 +202,12 @@ export function ChatView() {
   };
 
   const title = conversations.find((c) => c.id === activeId)?.title ?? 'Asistente de salud';
+  const foldText = (t: string) => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const visibleConversations = historyQuery.trim()
+    ? conversations.filter((c) =>
+        foldText(`${c.title} ${c.messages.map((m) => m.content).join(' ')}`).includes(foldText(historyQuery.trim())),
+      )
+    : conversations;
   const lastAssistantId = [...messages].reverse().find((m) => m.role === 'assistant')?.id;
 
   const sidebar = (
@@ -193,7 +231,26 @@ export function ChatView() {
         </button>
       </div>
 
+      {conversations.length > 0 && (
+        <div className="relative px-3 pb-2">
+          <Search className="pointer-events-none absolute top-1/2 left-6 size-3.5 -translate-y-1/2 text-label-tertiary" aria-hidden="true" />
+          <label htmlFor="history-search" className="sr-only">
+            Buscar en el historial
+          </label>
+          <input
+            id="history-search"
+            value={historyQuery}
+            onChange={(e) => setHistoryQuery(e.target.value)}
+            placeholder="Buscar conversaciones"
+            className="h-9 w-full rounded-xl bg-fill pr-3 pl-8 text-[14px] outline-none placeholder:text-label-tertiary focus:ring-4 focus:ring-accent-soft"
+          />
+        </div>
+      )}
+
       <nav aria-label="Conversaciones recientes" className="scrollbar-thin flex-1 overflow-y-auto px-3 pb-3">
+        {conversations.length > 0 && visibleConversations.length === 0 && (
+          <p className="px-3 py-6 text-center text-[13px] text-label-tertiary">Sin resultados para “{historyQuery}”.</p>
+        )}
         {conversations.length === 0 ? (
           <p className="px-3 py-6 text-center text-[13px] leading-relaxed text-label-tertiary">
             Aquí aparecerán tus conversaciones.
@@ -201,7 +258,7 @@ export function ChatView() {
             Se guardan solo en este dispositivo.
           </p>
         ) : (
-          groupByDay(conversations).map((group) => (
+          groupByDay(visibleConversations).map((group) => (
             <div key={group.label} className="mb-3">
               <p className="px-3 pt-2 pb-1 text-[11px] font-semibold tracking-wide text-label-tertiary uppercase">{group.label}</p>
               <ul>
@@ -284,6 +341,17 @@ export function ChatView() {
           </button>
           <h1 className="min-w-0 flex-1 truncate text-center text-[15px] font-semibold tracking-[-0.01em] lg:text-left">{title}</h1>
           <LocationPill className="hidden sm:inline-flex" />
+          {messages.length > 1 && !busy && (
+            <button
+              type="button"
+              onClick={share}
+              className="grid size-9 place-items-center rounded-full text-label-secondary hover:bg-fill hover:text-label"
+              aria-label={shared ? 'Conversación copiada' : 'Compartir conversación'}
+              title={shared ? 'Copiada al portapapeles' : 'Compartir conversación'}
+            >
+              {shared ? <Check className="size-[18px] text-green" /> : <Share className="size-[18px]" />}
+            </button>
+          )}
           <button
             type="button"
             onClick={startNew}
@@ -341,7 +409,17 @@ export function ChatView() {
                     message={message}
                     streaming={message.id === streamingId}
                     isLast={message.id === lastAssistantId}
-                    onFollowUp={send}
+                    onFollowUp={(text) => send(text)}
+                    onRegenerate={regenerate}
+                    speech={
+                      readAloud.supported
+                        ? {
+                            speaking: readAloud.speakingId === message.id,
+                            toggle: () =>
+                              readAloud.speakingId === message.id ? readAloud.stop() : readAloud.speak(message.id, message.content),
+                          }
+                        : undefined
+                    }
                   />
                 ),
               )}

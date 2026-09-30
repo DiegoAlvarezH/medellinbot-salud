@@ -5,6 +5,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { FooterGate } from '@/components/layout/FooterGate';
 import { LocationProvider } from '@/components/location/LocationProvider';
+import { SITE } from '@/lib/config/site';
 import './globals.css';
 
 // Inter is only a fallback: Apple devices render SF Pro through the system font stack.
@@ -20,6 +21,8 @@ export const metadata: Metadata = {
   keywords: ['salud', 'Medellín', 'Valle de Aburrá', 'IPS', 'vacunación', 'calidad del aire', 'SIATA', 'datos abiertos'],
   manifest: '/manifest.json',
   applicationName: 'MedellínBot Salud',
+  authors: [{ name: SITE.author, url: SITE.website }],
+  creator: SITE.author,
   appleWebApp: { capable: true, title: 'MedellínBot', statusBarStyle: 'default' },
   icons: { icon: '/icon.svg', apple: '/icon.svg' },
 };

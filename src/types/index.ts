@@ -10,7 +10,7 @@ export type ServiceType =
   | 'doctor'
   | 'other';
 
-export type DataSourceId = 'osm' | 'metrosalud' | 'reps';
+export type DataSourceId = 'osm' | 'metrosalud' | 'reps' | 'geomedellin';
 
 export interface HealthService {
   id: string;
@@ -26,6 +26,8 @@ export interface HealthService {
   /** Raw opening hours string (OSM `opening_hours` syntax or free text). */
   hours?: string;
   emergency?: boolean;
+  /** Reports vaccination activity to the Secretaría de Salud (GeoMedellín "Sedes Salud", flag reportavac). */
+  vaccination?: boolean;
   /** `true` public network (ESE / Metrosalud), `false` private, `undefined` unknown. */
   isPublic?: boolean;
   source: DataSourceId;

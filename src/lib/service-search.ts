@@ -7,7 +7,7 @@ import { isOpenAt } from '@/lib/opening-hours';
 import type { HealthService, Place, ServiceType } from '@/types';
 
 export function fold(text: string): string {
-  return text.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  return text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
 interface Specialty {
@@ -17,12 +17,23 @@ interface Specialty {
   query: RegExp;
   /** Matches facility names that clearly offer it. */
   name: RegExp;
+  /** Extra structured signal besides the name (e.g. the GeoMedellín vaccination flag). */
+  offers?: (s: HealthService) => boolean;
   types: ServiceType[];
 }
 
 const CARE: ServiceType[] = ['hospital', 'clinic', 'health-center'];
 
 const SPECIALTIES: Specialty[] = [
+  {
+    // The free national schedule (PAI) is applied in the public network: Metrosalud centres and hospital units.
+    id: 'vaccination',
+    label: 'vacunación (red pública y vacunatorios)',
+    query: /vacun|inmuniz/,
+    name: /metrosalud|unidad hospitalaria|centro de salud|vacun/,
+    offers: (s) => Boolean(s.vaccination),
+    types: ['health-center', 'hospital', 'clinic'],
+  },
   { id: 'pediatrics', label: 'pediatría', query: /pediatr|\bnin[oa]s?\b|\bbebe|infantil|mi hij[oa]/, name: /infantil|pediatr|\bnin[oa]s?\b|materno/, types: CARE },
   {
     id: 'mental',
@@ -41,7 +52,10 @@ const SPECIALTIES: Specialty[] = [
 ];
 
 /** Sites that are not general medical care: never used as filler for general or other-specialty questions. */
-const NON_GENERAL = /estetic|dermo|laser|\bspa\b|belleza|odonto|dental|dentix|sonrisa|optica|veterin|cirugia plastica|hospitalari[ao]s\b/;
+const NON_GENERAL =
+  /estetic|dermo|laser|\bspa\b|belleza|odonto|dental|dentix|sonrisa|optica|\bvision\b|optometr|veterin|cirugia plastica|hospitalari[ao]s\b/;
+/** Networks liquidated by the Superintendencia de Salud whose names linger in OpenStreetMap. */
+const DEFUNCT = /saludcoop|cafesalud|medimas|comfenalco antioquia eps/;
 /** Names that signal an emergency department (whole words: "Líneas Hospitalarias" is a shop). */
 const EMERGENCY_NAME = /\burgencias?\b|\bunidad hospitalaria\b|\bhospital\b|\bclinica\b/;
 
@@ -155,7 +169,7 @@ interface SearchInput {
 export function searchServices({ services, places, query, previousQueries = [], location, limit = 6 }: SearchInput): SearchResult {
   const plan = planSearch(query, previousQueries);
   const general = (s: HealthService) => !NON_GENERAL.test(fold(s.name));
-  let pool = services.filter((s) => plan.types.includes(s.type));
+  let pool = services.filter((s) => plan.types.includes(s.type) && !DEFUNCT.test(fold(s.name)));
   if (plan.types.includes('hospital') || plan.types.includes('health-center')) {
     pool = pool.filter((s) => general(s) || plan.specialty?.name.test(fold(s.name)));
   }
@@ -172,7 +186,8 @@ export function searchServices({ services, places, query, previousQueries = [], 
     if (open.length >= 3) pool = open;
   }
 
-  const matchesSpecialty = (s: HealthService) => Boolean(plan.specialty?.name.test(fold(s.name)));
+  const matchesSpecialty = (s: HealthService) =>
+    Boolean(plan.specialty && (plan.specialty.offers?.(s) || plan.specialty.name.test(fold(s.name))));
   if (plan.specialty) {
     const specialised = pool.filter(matchesSpecialty);
     // Keep specialised sites plus general care as a fallback (general practice also refers to specialists).
@@ -195,8 +210,12 @@ export function searchServices({ services, places, query, previousQueries = [], 
     // Specialised sites within a reasonable trip come first, then general care by distance.
     const byDistance = (a: (typeof scored)[number], b: (typeof scored)[number]) => a.distance! - b.distance!;
     const specialisedNear = scored.filter((x) => matchesSpecialty(x.service) && x.distance! < 8000).sort(byDistance).slice(0, 3);
-    const rest = scored.filter((x) => !specialisedNear.includes(x) && x.quality >= 1.5).sort(byDistance);
-    ordered = [...specialisedNear, ...rest];
+    // General care as filler: stay near the named place, and list documented sites (phone, REPS…) before bare map pins.
+    const radius = place ? 3500 : 8000;
+    const general = scored.filter((x) => !specialisedNear.includes(x) && x.distance! <= radius).sort(byDistance);
+    const documented = general.filter((x) => x.quality >= 1);
+    ordered = [...specialisedNear, ...documented, ...general.filter((x) => x.quality < 1)];
+    if (ordered.length < limit) ordered.push(...scored.filter((x) => !ordered.includes(x)).sort(byDistance));
   } else if (origin) {
     // Distance first, nudged by data quality: a well-documented hospital 1.2 km away beats an unnamed one at 1 km.
     const radius = place ? 3500 : Number.POSITIVE_INFINITY;

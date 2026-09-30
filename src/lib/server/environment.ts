@@ -3,6 +3,7 @@ import { cached } from '@/lib/server/cache';
 import { aqiCategory, icaFromPm25 } from '@/lib/air-quality';
 import { getModelledAir } from '@/lib/server/sources/open-meteo';
 import { fetchSiataSeries, fetchSiataStations, type StationSeries } from '@/lib/sources/siata';
+import { fetchHydrology, type Hydrology } from '@/lib/sources/siata-hydrology';
 import type { AirQualitySnapshot, AirStation } from '@/types';
 
 const AIR_TTL = 20 * 60 * 1000;
@@ -68,4 +69,9 @@ export function getAirQuality(): Promise<AirQualitySnapshot> {
 
 export function getStationSeries(code: string): Promise<StationSeries> {
   return cached(`air-series:${code}`, AIR_TTL, () => fetchSiataSeries(code));
+}
+
+/** Rain in the last 15 minutes and stream levels from SIATA's hydro-meteorological network. */
+export function getHydrology(): Promise<Hydrology> {
+  return cached('hydrology', 5 * 60 * 1000, () => fetchHydrology());
 }

@@ -2,6 +2,7 @@
  * "Centros de atención de Metrosalud" — MEData (Alcaldía de Medellín), dataset 1-048-22-000400, CC BY-SA 4.0.
  * The only official, geolocated list of the public primary-care network.
  */
+import { isInAburra } from '@/lib/geo';
 import type { HealthService } from '@/types';
 
 export const METROSALUD_CSV_URL =
@@ -61,9 +62,10 @@ export function parseMetrosalud(csv: string): HealthService[] {
 
   return rows
     .map((row, index): HealthService | null => {
-      const latitude = Number(row[iLat]);
-      const longitude = Number(row[iLng]);
-      if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
+      // Number('') is 0: blank cells must not become a pin in the Gulf of Guinea.
+      const latitude = row[iLat] ? Number(row[iLat]) : Number.NaN;
+      const longitude = row[iLng] ? Number(row[iLng]) : Number.NaN;
+      if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || !isInAburra({ latitude, longitude })) return null;
       const raw = row[iName] ?? '';
       return {
         id: `metrosalud-${index + 1}`,

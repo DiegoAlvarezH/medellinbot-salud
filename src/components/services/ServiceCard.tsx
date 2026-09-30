@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { SERVICE_TYPE_META } from '@/lib/services-meta';
 import { formatHours, isOpenAt } from '@/lib/opening-hours';
 import { directionsUrl, formatDistance } from '@/lib/geo';
+import { formatPhone, telHref } from '@/lib/phone';
 import { cn } from '@/lib/utils';
 import type { HealthService } from '@/types';
 
@@ -24,6 +25,7 @@ export function ServiceCard({ service, selected, onSelect, compact, className }:
   const meta = SERVICE_TYPE_META[service.type];
   const hours = formatHours(service.hours);
   const distance = formatDistance(service.distance);
+  const dial = telHref(service.phone);
   const Wrapper = onSelect ? 'button' : 'div';
 
   return (
@@ -41,6 +43,7 @@ export function ServiceCard({ service, selected, onSelect, compact, className }:
         <div className="flex flex-wrap items-center gap-1.5">
           <Badge tone={meta.tone}>{meta.label}</Badge>
           {service.emergency && <Badge tone="red">Urgencias</Badge>}
+          {service.vaccination && <Badge tone="purple">Vacunación</Badge>}
           {service.isPublic && <Badge tone="teal">Red pública</Badge>}
           <OpenBadge hours={service.hours} />
         </div>
@@ -73,9 +76,10 @@ export function ServiceCard({ service, selected, onSelect, compact, className }:
           <Navigation className="size-3.5" aria-hidden="true" />
           Cómo llegar
         </a>
-        {service.phone && (
+        {dial && (
           <a
-            href={`tel:${service.phone.replace(/[^\d+]/g, '')}`}
+            href={dial}
+            title={formatPhone(service.phone)}
             className="inline-flex h-8 items-center gap-1.5 rounded-full bg-fill px-3 text-[13px] font-medium text-label hover:bg-fill-strong"
           >
             <Phone className="size-3.5" aria-hidden="true" />

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { NAV_ITEMS } from '@/lib/config/navigation';
+import { SITE } from '@/lib/config/site';
 
 const SOURCES = [
   { href: 'https://www.datos.gov.co', label: 'Datos Abiertos Colombia' },
@@ -54,14 +55,27 @@ export function Footer() {
           </div>
           <div>
             <h2 className="mb-2 text-[12px] font-semibold text-label">Proyecto</h2>
-            <p className="leading-relaxed">Proyecto académico de la Universidad Nacional Abierta y a Distancia (UNAD).</p>
-            <a href="mailto:daalvarezherr@unadvirtual.edu.co" className="mt-1.5 inline-block text-link hover:underline">
-              daalvarezherr@unadvirtual.edu.co
-            </a>
+            <p className="leading-relaxed">
+              Desarrollado por <span className="font-medium text-label">{SITE.author}</span>. Proyecto académico de la {SITE.institution}.
+            </p>
+            <ul className="mt-1.5 space-y-1.5">
+              <li>
+                <a href={`mailto:${SITE.email}`} className="text-link hover:underline">
+                  {SITE.email}
+                </a>
+              </li>
+              <li>
+                <a href={SITE.website} target="_blank" rel="noreferrer" className="text-link hover:underline">
+                  {SITE.websiteLabel}
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
 
-        <p className="border-t border-separator pt-4">© {new Date().getFullYear()} MedellínBot Salud</p>
+        <p className="border-t border-separator pt-4">
+          © {new Date().getFullYear()} {SITE.name} · {SITE.author}
+        </p>
       </div>
     </footer>
   );

@@ -24,11 +24,12 @@ const MapView = dynamic(() => import('@/components/map/MapView'), {
   ),
 });
 
-type Filter = 'all' | 'urgent' | ServiceType;
+type Filter = 'all' | 'urgent' | 'vaccination' | ServiceType;
 
 const FILTERS: Array<{ value: Filter; label: string }> = [
   { value: 'all', label: 'Todo' },
   { value: 'urgent', label: 'Urgencias' },
+  { value: 'vaccination', label: 'Vacunación' },
   { value: 'hospital', label: 'Hospitales' },
   { value: 'health-center', label: 'Centros de salud' },
   { value: 'clinic', label: 'Clínicas' },
@@ -81,7 +82,8 @@ export function MapExplorer() {
     const list = services
       .filter((s) => {
         if (filter === 'urgent' && !isEmergencyCapable(s)) return false;
-        if (filter !== 'all' && filter !== 'urgent' && s.type !== filter) return false;
+        if (filter === 'vaccination' && !s.vaccination) return false;
+        if (filter !== 'all' && filter !== 'urgent' && filter !== 'vaccination' && s.type !== filter) return false;
         if (openNow && isOpenAt(s.hours) !== true) return false;
         if (q && !normalize(`${s.name} ${s.address ?? ''} ${s.neighborhood ?? ''} ${s.municipality ?? ''}`).includes(q)) return false;
         return true;
@@ -173,7 +175,7 @@ export function MapExplorer() {
           <>
             <p className="mb-3 text-[13px] text-label-secondary">
               {filtered.length.toLocaleString('es-CO')} resultados
-              {filter !== 'all' && filter !== 'urgent' ? ` · ${SERVICE_TYPE_META[filter].plural}` : ''}
+              {filter !== 'all' && filter !== 'urgent' && filter !== 'vaccination' ? ` · ${SERVICE_TYPE_META[filter].plural}` : ''}
             </p>
             <ul className="space-y-3">
               {filtered.slice(0, limit).map((service) => (

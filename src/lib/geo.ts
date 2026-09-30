@@ -19,7 +19,10 @@ export function formatDistance(meters?: number): string | undefined {
   return `${(meters / 1000).toFixed(meters < 10000 ? 1 : 0).replace('.', ',')} km`;
 }
 
-/** Rough outline of the Valle de Aburrá (lat, lng), from Caldas to Barbosa, excluding the Oriente (Rionegro). */
+/**
+ * Rough outline of the Valle de Aburrá (lat, lng), from Caldas to Barbosa, including Medellín's rural
+ * corregimientos to the west (Palmitas, San Cristóbal, San Antonio de Prado) and excluding the Oriente (Rionegro).
+ */
 const ABURRA_POLYGON: Array<[number, number]> = [
   [6.03, -75.68],
   [6.03, -75.55],
@@ -30,9 +33,9 @@ const ABURRA_POLYGON: Array<[number, number]> = [
   [6.46, -75.26],
   [6.5, -75.35],
   [6.42, -75.48],
-  [6.36, -75.58],
-  [6.32, -75.72],
-  [6.2, -75.72],
+  [6.4, -75.62],
+  [6.38, -75.74],
+  [6.2, -75.74],
 ];
 
 /** Ray-casting point-in-polygon test against the valley outline. */

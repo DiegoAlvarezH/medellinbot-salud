@@ -31,7 +31,7 @@ Todas son públicas y no requieren API key. Detalle de endpoints y campos en [`d
 
 ## Puesta en marcha
 
-Requisitos: Node.js 20+ y pnpm.
+Requisitos: Node.js 22+ y pnpm.
 
 ```bash
 pnpm install
@@ -84,4 +84,7 @@ Stack: Next.js 16 · React 19 · TypeScript · Tailwind CSS 4 · Leaflet + OpenS
 
 Servicio informativo: no ofrece diagnósticos ni reemplaza la consulta médica. En una emergencia llama al **123**.
 
-Proyecto académico — Universidad Nacional Abierta y a Distancia (UNAD). Contacto: daalvarezherr@unadvirtual.edu.co
+Desarrollado por **Diego Álvarez** — proyecto académico de la Universidad Nacional Abierta y a Distancia (UNAD).
+
+- Correo: [diegoah905@gmail.com](mailto:diegoah905@gmail.com)
+- Sitio web: [diegoalvarez.site](https://diegoalvarez.site)
