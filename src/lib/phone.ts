@@ -5,7 +5,8 @@
 
 function split(raw: string): { digits: string; extension?: string } {
   const [main, ...rest] = raw.split(/\s*(?:ext\.?|extensi[oó]n|ext:)\s*/i);
-  const firstNumber = main.split(/[,;/]| y | o /i)[0] ?? main;
+  // Registries list several numbers in one field: "4125594 - 3498920", "604… / 300…", "… y …".
+  const firstNumber = main.split(/\s[-–]\s|[,;/]| y | o /i)[0] ?? main;
   const extension = rest.join(' ').match(/\d+/)?.[0];
   return { digits: firstNumber.replace(/\D/g, '').replace(/^57(?=\d{10}$)/, ''), extension };
 }

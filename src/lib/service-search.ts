@@ -195,8 +195,12 @@ export function searchServices({ services, places, query, previousQueries = [], 
     // Specialised sites within a reasonable trip come first, then general care by distance.
     const byDistance = (a: (typeof scored)[number], b: (typeof scored)[number]) => a.distance! - b.distance!;
     const specialisedNear = scored.filter((x) => matchesSpecialty(x.service) && x.distance! < 8000).sort(byDistance).slice(0, 3);
-    const rest = scored.filter((x) => !specialisedNear.includes(x) && x.quality >= 1.5).sort(byDistance);
-    ordered = [...specialisedNear, ...rest];
+    // General care as filler: stay near the named place, and list documented sites (phone, REPS…) before bare map pins.
+    const radius = place ? 3500 : 8000;
+    const general = scored.filter((x) => !specialisedNear.includes(x) && x.distance! <= radius).sort(byDistance);
+    const documented = general.filter((x) => x.quality >= 1);
+    ordered = [...specialisedNear, ...documented, ...general.filter((x) => x.quality < 1)];
+    if (ordered.length < limit) ordered.push(...scored.filter((x) => !ordered.includes(x)).sort(byDistance));
   } else if (origin) {
     // Distance first, nudged by data quality: a well-documented hospital 1.2 km away beats an unnamed one at 1 km.
     const radius = place ? 3500 : Number.POSITIVE_INFINITY;
