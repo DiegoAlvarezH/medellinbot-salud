@@ -43,6 +43,7 @@ export function ServiceCard({ service, selected, onSelect, compact, className }:
         <div className="flex flex-wrap items-center gap-1.5">
           <Badge tone={meta.tone}>{meta.label}</Badge>
           {service.emergency && <Badge tone="red">Urgencias</Badge>}
+          {service.vaccination && <Badge tone="purple">Vacunación</Badge>}
           {service.isPublic && <Badge tone="teal">Red pública</Badge>}
           <OpenBadge hours={service.hours} />
         </div>

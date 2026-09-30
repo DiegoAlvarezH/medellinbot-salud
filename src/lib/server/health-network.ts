@@ -1,6 +1,7 @@
 import 'server-only';
 import { cached } from '@/lib/server/cache';
 import { snapshotFirst } from '@/lib/server/snapshots';
+import { fetchSedesSalud } from '@/lib/sources/geomedellin';
 import { fetchMetrosalud } from '@/lib/sources/metrosalud';
 import { buildNetwork } from '@/lib/sources/network';
 import { fetchOsmPlaces, fetchOsmServices, fetchOsmStations } from '@/lib/sources/osm';
@@ -26,17 +27,24 @@ export function getReps(): Promise<RepsSede[]> {
 /** Unified, geolocated health network for the Valle de Aburrá (≈1 000 sites). */
 export function getHealthNetwork(): Promise<HealthNetwork> {
   return cached('health-network', 6 * 60 * 60 * 1000, async () => {
-    const [metrosalud, osm, stations, reps] = await Promise.all([
+    const [metrosalud, osm, stations, reps, sedes] = await Promise.all([
       snapshotFirst('metrosalud', 30 * DAY, () => fetchMetrosalud()),
       snapshotFirst('osm-health', 7 * DAY, () => fetchOsmServices()),
       snapshotFirst('osm-stations', 30 * DAY, () => fetchOsmStations()),
       snapshotFirst('reps-aburra', 7 * DAY, () => fetchRepsIps()),
+      snapshotFirst('geomedellin-sedes', 30 * DAY, () => fetchSedesSalud()).catch(() => ({ data: [], generatedAt: '' })),
     ]);
-    const services = buildNetwork({ metrosalud: metrosalud.data, osm: osm.data, reps: reps.data, stations: stations.data });
+    const services = buildNetwork({
+      metrosalud: metrosalud.data,
+      osm: osm.data,
+      reps: reps.data,
+      stations: stations.data,
+      sedes: sedes.data,
+    });
     const updatedAt = [metrosalud, osm, reps].map((s) => s.generatedAt).sort()[0];
     return {
       services,
-      sources: ['MEData · Metrosalud', 'REPS · MinSalud (datos.gov.co)', '© colaboradores de OpenStreetMap'],
+      sources: ['MEData · Metrosalud', 'GeoMedellín · Sedes Salud', 'REPS · MinSalud (datos.gov.co)', '© colaboradores de OpenStreetMap'],
       updatedAt,
     };
   });

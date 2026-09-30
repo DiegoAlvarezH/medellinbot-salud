@@ -7,7 +7,7 @@ import { isOpenAt } from '@/lib/opening-hours';
 import type { HealthService, Place, ServiceType } from '@/types';
 
 export function fold(text: string): string {
-  return text.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  return text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
 interface Specialty {
@@ -17,6 +17,8 @@ interface Specialty {
   query: RegExp;
   /** Matches facility names that clearly offer it. */
   name: RegExp;
+  /** Extra structured signal besides the name (e.g. the GeoMedellín vaccination flag). */
+  offers?: (s: HealthService) => boolean;
   types: ServiceType[];
 }
 
@@ -29,6 +31,7 @@ const SPECIALTIES: Specialty[] = [
     label: 'vacunación (red pública y vacunatorios)',
     query: /vacun|inmuniz/,
     name: /metrosalud|unidad hospitalaria|centro de salud|vacun/,
+    offers: (s) => Boolean(s.vaccination),
     types: ['health-center', 'hospital', 'clinic'],
   },
   { id: 'pediatrics', label: 'pediatría', query: /pediatr|\bnin[oa]s?\b|\bbebe|infantil|mi hij[oa]/, name: /infantil|pediatr|\bnin[oa]s?\b|materno/, types: CARE },
@@ -183,7 +186,8 @@ export function searchServices({ services, places, query, previousQueries = [], 
     if (open.length >= 3) pool = open;
   }
 
-  const matchesSpecialty = (s: HealthService) => Boolean(plan.specialty?.name.test(fold(s.name)));
+  const matchesSpecialty = (s: HealthService) =>
+    Boolean(plan.specialty && (plan.specialty.offers?.(s) || plan.specialty.name.test(fold(s.name))));
   if (plan.specialty) {
     const specialised = pool.filter(matchesSpecialty);
     // Keep specialised sites plus general care as a fallback (general practice also refers to specialists).
