@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "type-check": "tsc --noEmit",
-    "data:sync": "tsx scripts/sync-data.ts"
+    "data:sync": "tsx scripts/sync-data.ts",
+    "test": "tsx --test \"test/**/*.test.ts\""
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
