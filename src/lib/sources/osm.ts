@@ -2,6 +2,7 @@
  * OpenStreetMap health facilities for the Valle de Aburrá via the Overpass API.
  * Shared by the Next.js server and scripts/sync-data.ts, so it must not import server-only code.
  */
+import { USER_AGENT } from '@/lib/config/site';
 import { isInAburra } from '@/lib/geo';
 import type { HealthService, Place, ServiceType, TransitStation } from '@/types';
 
@@ -117,7 +118,7 @@ async function overpass(query: string, fetchImpl: typeof fetch): Promise<Overpas
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'User-Agent': 'MedellinBotSalud/2.0 (proyecto academico UNAD; daalvarezherr@unadvirtual.edu.co)',
+          'User-Agent': USER_AGENT,
         },
         body: `data=${encodeURIComponent(query)}`,
         signal: AbortSignal.timeout(100_000),

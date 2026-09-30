@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
+import { Globe, Mail } from 'lucide-react';
 import { PageHero, SectionHeader } from '@/components/ui/section';
+import { SITE } from '@/lib/config/site';
 
 export const metadata: Metadata = {
   title: 'Acerca',
@@ -138,14 +140,30 @@ export default function AboutPage() {
             </p>
           </div>
           <div className="rounded-tile bg-bg-elevated p-6 shadow-card sm:p-8">
-            <p className="eyebrow mb-2">Equipo</p>
-            <p className="text-[17px] leading-relaxed text-label-secondary">
-              Proyecto de investigación de la <strong className="font-semibold text-label">Universidad Nacional Abierta y a Distancia (UNAD)</strong> en
-              tecnologías aplicadas a la salud pública.
+            <p className="eyebrow mb-2">Autor</p>
+            <p className="text-[21px] font-semibold tracking-[-0.015em] text-label">{SITE.author}</p>
+            <p className="mt-1 text-[17px] leading-relaxed text-label-secondary">
+              Proyecto de investigación de la <strong className="font-semibold text-label">{SITE.institution}</strong> en tecnologías
+              aplicadas a la salud pública.
             </p>
-            <a href="mailto:daalvarezherr@unadvirtual.edu.co" className="mt-4 inline-block text-[17px] text-link hover:underline">
-              daalvarezherr@unadvirtual.edu.co
-            </a>
+            <div className="mt-5 flex flex-wrap gap-2">
+              <a
+                href={`mailto:${SITE.email}`}
+                className="inline-flex h-9 items-center gap-2 rounded-full bg-accent px-4 text-[15px] font-medium text-white hover:bg-accent-hover"
+              >
+                <Mail className="size-4" aria-hidden="true" />
+                {SITE.email}
+              </a>
+              <a
+                href={SITE.website}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-9 items-center gap-2 rounded-full bg-fill px-4 text-[15px] font-medium text-label hover:bg-fill-strong"
+              >
+                <Globe className="size-4" aria-hidden="true" />
+                {SITE.websiteLabel}
+              </a>
+            </div>
           </div>
         </div>
       </section>
