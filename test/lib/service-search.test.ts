@@ -18,6 +18,9 @@ const SERVICES: HealthService[] = [
   { ...base, id: 'rebaja-1', name: 'Droguería La Rebaja', type: 'pharmacy', ...at(6.2450, -75.5900) },
   { ...base, id: 'rebaja-2', name: 'Droguería La Rebaja Plus', type: 'pharmacy', ...at(6.2460, -75.5910) },
   { ...base, id: 'pasteur', name: 'Farmacia Pasteur', type: 'pharmacy', ...at(6.2470, -75.5920) },
+  { ...base, id: 'saludcoop', name: 'Saludcoop Laureles', type: 'clinic', ...at(6.2449, -75.5908) },
+  { ...base, id: 'vision', name: 'Visión Total', type: 'clinic', ...at(6.2452, -75.5911) },
+  { ...base, id: 'cs-estadio', name: 'Centro de Salud Estadio', type: 'health-center', ...at(6.2530, -75.5890), isPublic: true, source: 'metrosalud' },
 ];
 
 const PLACES: Place[] = [
@@ -80,6 +83,13 @@ describe('searchServices', () => {
     assert.ok(ids.includes('mfs'));
     assert.ok(!ids.includes('mfs-dup'), 'duplicate kept');
     assert.ok(!ids.includes('mental'), 'mental hospital offered for gynaecology');
+  });
+
+  it('sends vaccination questions to the public network, never to defunct EPS or opticians', () => {
+    const { services } = searchServices({ services: SERVICES, places: PLACES, query: '¿Dónde me vacuno contra la influenza cerca?', location: laureles });
+    const ids = services.map((s) => s.id);
+    assert.equal(ids[0], 'cs-estadio');
+    assert.ok(!ids.includes('saludcoop') && !ids.includes('vision'), ids.join());
   });
 
   it('attaches the distance to the user when the location is known', () => {

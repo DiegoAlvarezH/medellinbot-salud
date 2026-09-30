@@ -23,6 +23,14 @@ interface Specialty {
 const CARE: ServiceType[] = ['hospital', 'clinic', 'health-center'];
 
 const SPECIALTIES: Specialty[] = [
+  {
+    // The free national schedule (PAI) is applied in the public network: Metrosalud centres and hospital units.
+    id: 'vaccination',
+    label: 'vacunación (red pública y vacunatorios)',
+    query: /vacun|inmuniz/,
+    name: /metrosalud|unidad hospitalaria|centro de salud|vacun/,
+    types: ['health-center', 'hospital', 'clinic'],
+  },
   { id: 'pediatrics', label: 'pediatría', query: /pediatr|\bnin[oa]s?\b|\bbebe|infantil|mi hij[oa]/, name: /infantil|pediatr|\bnin[oa]s?\b|materno/, types: CARE },
   {
     id: 'mental',
@@ -41,7 +49,10 @@ const SPECIALTIES: Specialty[] = [
 ];
 
 /** Sites that are not general medical care: never used as filler for general or other-specialty questions. */
-const NON_GENERAL = /estetic|dermo|laser|\bspa\b|belleza|odonto|dental|dentix|sonrisa|optica|veterin|cirugia plastica|hospitalari[ao]s\b/;
+const NON_GENERAL =
+  /estetic|dermo|laser|\bspa\b|belleza|odonto|dental|dentix|sonrisa|optica|\bvision\b|optometr|veterin|cirugia plastica|hospitalari[ao]s\b/;
+/** Networks liquidated by the Superintendencia de Salud whose names linger in OpenStreetMap. */
+const DEFUNCT = /saludcoop|cafesalud|medimas|comfenalco antioquia eps/;
 /** Names that signal an emergency department (whole words: "Líneas Hospitalarias" is a shop). */
 const EMERGENCY_NAME = /\burgencias?\b|\bunidad hospitalaria\b|\bhospital\b|\bclinica\b/;
 
@@ -155,7 +166,7 @@ interface SearchInput {
 export function searchServices({ services, places, query, previousQueries = [], location, limit = 6 }: SearchInput): SearchResult {
   const plan = planSearch(query, previousQueries);
   const general = (s: HealthService) => !NON_GENERAL.test(fold(s.name));
-  let pool = services.filter((s) => plan.types.includes(s.type));
+  let pool = services.filter((s) => plan.types.includes(s.type) && !DEFUNCT.test(fold(s.name)));
   if (plan.types.includes('hospital') || plan.types.includes('health-center')) {
     pool = pool.filter((s) => general(s) || plan.specialty?.name.test(fold(s.name)));
   }
