@@ -1,7 +1,8 @@
 'use client';
 
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState, type KeyboardEvent } from 'react';
-import { ArrowUp, Square } from 'lucide-react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState, type KeyboardEvent } from 'react';
+import { ArrowUp, Mic, Square } from 'lucide-react';
+import { useDictation } from '@/hooks/use-speech';
 import { cn } from '@/lib/utils';
 
 interface ComposerProps {
@@ -19,6 +20,13 @@ const MAX_LENGTH = 2000;
 export const Composer = forwardRef<ComposerHandle, ComposerProps>(function Composer({ onSend, onStop, busy }, ref) {
   const [text, setText] = useState('');
   const textarea = useRef<HTMLTextAreaElement>(null);
+  // Text typed before dictation started, so the transcript is appended instead of replacing it.
+  const beforeDictation = useRef('');
+  const onDictated = useCallback((spoken: string) => {
+    const prefix = beforeDictation.current;
+    setText(prefix ? `${prefix} ${spoken}` : spoken);
+  }, []);
+  const dictation = useDictation(onDictated);
 
   useImperativeHandle(ref, () => ({ focus: () => textarea.current?.focus() }), []);
 
@@ -32,6 +40,7 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(function Compo
   const submit = () => {
     const value = text.trim();
     if (!value || busy) return;
+    if (dictation.listening) dictation.stop();
     onSend(value);
     setText('');
   };
@@ -70,6 +79,29 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(function Compo
               enterKeyHint="send"
               className="max-h-[168px] min-h-10 flex-1 resize-none bg-transparent py-[9px] text-[16px] leading-[22px] text-label outline-none placeholder:text-label-tertiary"
             />
+            {dictation.supported && !busy && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (dictation.listening) {
+                    dictation.stop();
+                  } else {
+                    beforeDictation.current = text.trim();
+                    dictation.start();
+                  }
+                }}
+                aria-pressed={dictation.listening}
+                className={cn(
+                  'relative grid size-10 shrink-0 place-items-center rounded-full transition-colors',
+                  dictation.listening ? 'bg-red text-white' : 'text-label-secondary hover:bg-fill hover:text-label',
+                )}
+                aria-label={dictation.listening ? 'Detener dictado' : 'Dictar por voz'}
+                title={dictation.listening ? 'Detener dictado' : 'Dictar por voz'}
+              >
+                {dictation.listening && <span className="absolute inset-0 animate-ping rounded-full bg-red opacity-40" aria-hidden="true" />}
+                <Mic className="relative size-[18px]" aria-hidden="true" />
+              </button>
+            )}
             {busy ? (
               <button
                 type="button"
@@ -92,6 +124,11 @@ export const Composer = forwardRef<ComposerHandle, ComposerProps>(function Compo
             )}
           </div>
         </div>
+        {(dictation.listening || dictation.error) && (
+          <p className={cn('mt-2 text-center text-[12px]', dictation.error ? 'text-orange' : 'text-red')} role="status">
+            {dictation.error ?? 'Escuchando… habla con naturalidad y toca el micrófono para terminar.'}
+          </p>
+        )}
         <p className="mt-2 text-center text-[11px] text-label-tertiary">
           Información general, no es un diagnóstico. En emergencias llama al{' '}
           <a href="tel:123" className="font-semibold text-red">

@@ -5,7 +5,7 @@ import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { motion } from 'framer-motion';
-import { Check, Copy, Phone, Wind } from 'lucide-react';
+import { Check, Copy, Phone, RotateCcw, Square, Volume2, Wind } from 'lucide-react';
 import { Logo } from '@/components/layout/Logo';
 import { ServiceCard } from '@/components/services/ServiceCard';
 import { AqiIndicator } from '@/components/environment/AqiIndicator';
@@ -39,6 +39,9 @@ export function TypingDots() {
   );
 }
 
+const actionClass =
+  'inline-flex h-7 items-center gap-1 rounded-full px-2 text-[12px] text-label-tertiary transition-colors hover:bg-fill hover:text-label';
+
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
   return (
@@ -53,7 +56,7 @@ function CopyButton({ text }: { text: string }) {
           // Clipboard blocked (insecure context): nothing to do.
         }
       }}
-      className="inline-flex h-7 items-center gap-1 rounded-full px-2 text-[12px] text-label-tertiary transition-colors hover:bg-fill hover:text-label"
+      className={actionClass}
       aria-label="Copiar respuesta"
     >
       {copied ? <Check className="size-3.5 text-green" /> : <Copy className="size-3.5" />}
@@ -68,9 +71,12 @@ interface MessageBubbleProps {
   /** Only the latest answer shows follow-up chips. */
   isLast?: boolean;
   onFollowUp?: (text: string) => void;
+  /** Read-aloud state for this message; omitted when the browser has no speech synthesis. */
+  speech?: { speaking: boolean; toggle: () => void };
+  onRegenerate?: () => void;
 }
 
-export function MessageBubble({ message, streaming, isLast, onFollowUp }: MessageBubbleProps) {
+export function MessageBubble({ message, streaming, isLast, onFollowUp, speech, onRegenerate }: MessageBubbleProps) {
   const { cards } = message;
 
   if (message.role === 'user') {
@@ -144,6 +150,18 @@ export function MessageBubble({ message, streaming, isLast, onFollowUp }: Messag
         {!streaming && message.content && (
           <div className="flex flex-wrap items-center gap-1">
             <CopyButton text={message.content} />
+            {speech && (
+              <button type="button" onClick={speech.toggle} className={actionClass} aria-pressed={speech.speaking}>
+                {speech.speaking ? <Square className="size-3 fill-current" /> : <Volume2 className="size-3.5" />}
+                {speech.speaking ? 'Detener' : 'Escuchar'}
+              </button>
+            )}
+            {isLast && onRegenerate && (
+              <button type="button" onClick={onRegenerate} className={actionClass}>
+                <RotateCcw className="size-3.5" />
+                Regenerar
+              </button>
+            )}
             {message.source === 'fallback' && (
               <span className="rounded-full bg-fill px-2 py-0.5 text-[11px] text-label-tertiary">Modo básico · datos abiertos</span>
             )}
