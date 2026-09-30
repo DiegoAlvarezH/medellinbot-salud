@@ -9,7 +9,9 @@
  */
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { fetchSedesSalud } from '@/lib/sources/geomedellin';
 import { fetchIndicators } from '@/lib/sources/indicators';
+import { fetchOtcList } from '@/lib/sources/medicines';
 import { fetchMetrosalud } from '@/lib/sources/metrosalud';
 import { fetchOsmPlaces, fetchOsmServices, fetchOsmStations } from '@/lib/sources/osm';
 import { fetchRepsIps } from '@/lib/sources/reps';
@@ -22,7 +24,12 @@ const JOBS: Record<string, { source: string; run: () => Promise<unknown[] | obje
   'osm-health': { source: 'OpenStreetMap · Overpass API (ODbL)', run: () => fetchOsmServices() },
   'osm-stations': { source: 'OpenStreetMap · Overpass API (ODbL)', run: () => fetchOsmStations() },
   'osm-places': { source: 'OpenStreetMap · Overpass API (ODbL)', run: () => fetchOsmPlaces() },
-  indicators: { source: 'datos.gov.co · 8u7u-645t (vacunación) y 4hyg-wa9d (SIVIGILA)', run: () => fetchIndicators() },
+  'geomedellin-sedes': { source: 'GeoMedellín · Sedes Salud (MAP5_Cartobase/MapServer/4)', run: () => fetchSedesSalud() },
+  'invima-otc': { source: 'datos.gov.co · INVIMA medicamentos de venta libre (xzwx-qpja)', run: () => fetchOtcList() },
+  indicators: {
+    source: 'datos.gov.co · vacunación (8u7u-645t), SIVIGILA (4hyg-wa9d), IRCA (nxt2-39c3), ADRES BDUA (tq4m-hmg2, d7a5-cnra), mortalidad (db67-sbus, 22wy-39ih, xvyx-dzp4)',
+    run: () => fetchIndicators(),
+  },
 };
 
 async function main() {

@@ -15,7 +15,9 @@ export interface ProviderStats {
 export async function getIndicators(): Promise<Indicators & { generatedAt: string }> {
   return cached('indicators', DAY, async () => {
     const { data, generatedAt } = await snapshotFirst('indicators', 7 * DAY, () => fetchIndicators());
-    return { ...data, generatedAt };
+    // Older snapshots predate the water/EPS/mortality datasets: default them so the page still renders.
+    const partial = data as Omit<Indicators, 'water' | 'eps' | 'mortality'> & Partial<Indicators>;
+    return { ...partial, water: partial.water ?? null, eps: partial.eps ?? null, mortality: partial.mortality ?? [], generatedAt };
   });
 }
 
