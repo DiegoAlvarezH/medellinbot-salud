@@ -6,9 +6,10 @@ import { formatPhone } from '@/lib/phone';
 import { SERVICE_TYPE_META } from '@/lib/services-meta';
 import { HELP_LINES, WARNING_SIGNS } from '@/lib/knowledge/help-lines';
 import { PAI_SOURCE_URL, VACCINATION_NOTES, VACCINATION_STAGES } from '@/lib/knowledge/vaccination';
-import { getAirQuality } from '@/lib/server/environment';
+import { getAirQuality, getHydrology } from '@/lib/server/environment';
 import { getHealthNetwork, getPlaces, getReps } from '@/lib/server/health-network';
 import { getIndicators } from '@/lib/server/indicators';
+import { searchMedicines } from '@/lib/server/medicines';
 import { getWeather } from '@/lib/server/sources/open-meteo';
 import { searchServices } from '@/lib/service-search';
 import type { ChatCards, HealthService } from '@/types';
@@ -22,7 +23,11 @@ export type Intent =
   | 'mental-health'
   | 'violence'
   | 'appointments'
-  | 'indicators';
+  | 'indicators'
+  | 'medicines'
+  | 'hydrology'
+  | 'water'
+  | 'insurance';
 
 const INTENT_PATTERNS: Record<Intent, RegExp> = {
   emergency:
@@ -35,7 +40,12 @@ const INTENT_PATTERNS: Record<Intent, RegExp> = {
   'mental-health': /\b(ansie|depre|triste|suicid|matarme|salud mental|psic[oó]l|estr[eé]s|p[aá]nico|soledad|angustia|no quiero vivir)/,
   violence: /\b(violencia|maltrat|abus|golpe|agresi|acoso|violaci|denunci)/,
   appointments: /\b(cita|agendar|pedir turno|eps|afiliad|sisb[eé]n|savia)/,
-  indicators: /\b(dengue|casos|estad[ií]stic|indicador|cobertura|sivigila|epidemi|brote)/,
+  indicators: /\b(dengue|casos|estad[ií]stic|indicador|cobertura|sivigila|epidemi|brote|suicidio|mortalidad|muertes)/,
+  medicines:
+    /\b(medicament|medicina|pastilla|remedio|invima|registro sanitario|venta libre|sin formula|formula medica|jarabe|capsula|tableta|precio (del?|de la)|cuanto (cuesta|vale))/,
+  hydrology: /\b(lluvi|llov|aguacero|tormenta|inundac|crecient|quebrada|rio medellin|deslizamiento|derrumbe)/,
+  water: /\b(agua (de la llave|del grifo|potable|de epm)|tomar agua|calidad del agua|irca|acueducto)/,
+  insurance: /\b(eps|afiliad|regimen (subsidiado|contributivo)|sisben|savia|sura|nueva eps|salud total|sanitas)/,
 };
 
 function fold(text: string): string {
@@ -51,6 +61,11 @@ export function detectIntents(query: string): Set<Intent> {
   if (intents.has('emergency')) intents.add('services');
   return intents;
 }
+
+/** Words that describe the question, not the medicine being asked about. */
+const MEDICINE_STOPWORDS = new Set(
+  'medicamento medicamentos medicina pastilla pastillas remedio invima registro sanitario venta libre formula medica necesita necesito puedo comprar tomar cuanto cuesta precio jarabe capsulas tabletas sirve donde'.split(' '),
+);
 
 const PLACE_STOPWORDS = new Set(
   'hola quiero necesito donde cerca cercano cercana cual cuales como para una un el la los las de del en que hay por favor mas salud centro hospital clinica farmacia urgencias ahora abierta abierto hoy barrio comuna medellin'.split(' '),
@@ -113,6 +128,8 @@ function followUpsFor(intents: Set<Intent>, hasLocation: boolean): string[] {
   if (intents.has('vaccination')) out.push('¿Dónde me puedo vacunar cerca?');
   if (intents.has('mental-health')) out.push('¿Dónde hay atención psicológica cerca?');
   if (intents.has('indicators')) out.push('¿Cómo prevengo el dengue?');
+  if (intents.has('medicines')) out.push('¿Es de venta libre?', '¿Tiene precio regulado?');
+  if (intents.has('hydrology')) out.push('¿Hay quebradas en alerta?');
   if (!out.length) out.push('Urgencias cerca de mí', '¿Cómo está el aire hoy?');
   return out.slice(0, 3);
 }
@@ -206,6 +223,79 @@ export async function retrieveContext(query: string, location?: LatLng, previous
       `ESQUEMA NACIONAL DE VACUNACIÓN PAI (MinSalud, julio 2026, ${PAI_SOURCE_URL}):\n${VACCINATION_STAGES.map(
         (s) => `- ${s.label}: ${s.doses.map((d) => `${d.vaccine} (${d.dose}${d.note ? `; ${d.note}` : ''})`).join(', ')}`,
       ).join('\n')}\nNotas: ${VACCINATION_NOTES.join(' ')}\nPuntos de vacunación: centros de salud y unidades hospitalarias de Metrosalud y las IPS vacunadoras de cada EPS.`,
+    );
+  }
+
+  if (intents.has('medicines')) {
+    // Try the longest words first: "¿el losartán necesita fórmula?" → "losartan".
+    const candidates = fold(query)
+      .replace(/[^a-z ]/g, ' ')
+      .split(/\s+/)
+      .filter((w) => w.length >= 5 && !MEDICINE_STOPWORDS.has(w))
+      .sort((a, b) => b.length - a.length)
+      .slice(0, 3);
+    tasks.push(
+      (async () => {
+        for (const word of candidates) {
+          const result = await searchMedicines(word).catch(() => null);
+          if (!result || !result.products.length) continue;
+          const otc = result.otc.length > 0;
+          const price = result.prices[0];
+          sections.push(
+            [
+              `MEDICAMENTO "${word}" (INVIMA y MinSalud, datos.gov.co):`,
+              `- Venta libre según INVIMA: ${otc ? `sí (${result.otc.slice(0, 2).map((o) => [o.concentration, o.form].filter(Boolean).join(', ')).join('; ')})` : 'no aparece en el listado de venta libre (probablemente requiere fórmula médica)'}.`,
+              `- Registros sanitarios vigentes (ejemplos): ${result.products.slice(0, 4).map((p) => `${p.product} — ${p.registration}`).join('; ')}.`,
+              price
+                ? `- Precio máximo regulado (${price.circular}): ${price.medicine} → ${price.commercial ? `farmacia $${price.commercial}` : ''}${price.institutional ? ` institucional $${price.institutional}` : ''} COP.`
+                : '- No tiene precio máximo regulado (precio libre).',
+              `- Página para consultar más: /medicamentos?q=${encodeURIComponent(word)}`,
+            ].join('\n'),
+          );
+          summary.push(
+            `**${word.charAt(0).toUpperCase()}${word.slice(1)}**: ${otc ? 'de venta libre' : 'probablemente requiere fórmula médica'}${price?.commercial ? ` · precio máximo en farmacia $${price.commercial.toLocaleString('es-CO')}` : ''}. [Ver detalle](/medicamentos?q=${encodeURIComponent(word)})`,
+          );
+          break;
+        }
+      })(),
+    );
+  }
+
+  if (intents.has('hydrology')) {
+    tasks.push(
+      getHydrology()
+        .then(({ rain, levels }) => {
+          const heaviest = rain.heaviest.slice(0, 3).map((g) => `${g.name} (${g.municipality}) ${g.last15min} mm`).join('; ');
+          const flagged = [...levels.alert, ...levels.watch].slice(0, 5).map((l) => `${l.name} (${l.municipality}, ${l.status})`).join('; ');
+          sections.push(
+            `LLUVIA Y QUEBRADAS (SIATA, tiempo real, ${rain.updatedAt ?? ''}):\n- Lloviendo en ${rain.raining.length} de ${rain.gauges} pluviómetros en los últimos 15 min.${heaviest ? ` Más intensa: ${heaviest}.` : ''}\n- Estaciones de nivel en alerta: ${levels.alert.length}; en precaución: ${levels.watch.length}.${flagged ? ` ${flagged}.` : ''}\n- Recomendación ante crecientes: no cruzar quebradas crecidas, alejarse de las orillas y llamar al 123 en emergencia.`,
+          );
+          summary.push(
+            `Lluvia: **${rain.raining.length} de ${rain.gauges}** pluviómetros del SIATA registran lluvia ahora. Quebradas en alerta: **${levels.alert.length}**, en precaución: **${levels.watch.length}**.`,
+          );
+        })
+        .catch(() => undefined),
+    );
+  }
+
+  if (intents.has('water') || intents.has('insurance')) {
+    tasks.push(
+      getIndicators()
+        .then((ind) => {
+          if (intents.has('water') && ind.water) {
+            sections.push(
+              `CALIDAD DEL AGUA (INS/SIVICAP, IRCA ${ind.water.year}): Medellín ${ind.water.irca} (${ind.water.risk}); urbano ${ind.water.urban ?? 'N/D'}, rural ${ind.water.rural ?? 'N/D'}. Escala: 0–5 sin riesgo, 5–14 bajo, 14–35 medio, 35–80 alto, >80 inviable. En zona rural o veredal con acueducto propio conviene hervir el agua.`,
+            );
+            summary.push(`Agua potable: IRCA **${ind.water.irca}** en ${ind.water.year} (**${ind.water.risk}**). En zona rural con acueducto veredal, hiérvela.`);
+          }
+          if (intents.has('insurance') && ind.eps) {
+            const list = (items: typeof ind.eps.contributivo) => items.slice(0, 5).map((e) => `${e.eps} (${e.affiliates.toLocaleString('es-CO')})`).join(', ');
+            sections.push(
+              `EPS EN MEDELLÍN (ADRES, afiliados activos): contributivo: ${list(ind.eps.contributivo)}. Subsidiado: ${list(ind.eps.subsidiado)}. Para citas, autorizaciones o cambio de EPS la persona debe contactar a su EPS; en la red pública, Metrosalud atiende principalmente a Savia Salud.`,
+            );
+          }
+        })
+        .catch(() => undefined),
     );
   }
 

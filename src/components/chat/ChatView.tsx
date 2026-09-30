@@ -202,7 +202,7 @@ export function ChatView() {
   };
 
   const title = conversations.find((c) => c.id === activeId)?.title ?? 'Asistente de salud';
-  const foldText = (t: string) => t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  const foldText = (t: string) => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   const visibleConversations = historyQuery.trim()
     ? conversations.filter((c) =>
         foldText(`${c.title} ${c.messages.map((m) => m.content).join(' ')}`).includes(foldText(historyQuery.trim())),
