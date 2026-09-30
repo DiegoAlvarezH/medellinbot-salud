@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
 import { Baby, Bike, Droplets, HeartPulse, Sun, Thermometer, Umbrella, Users } from 'lucide-react';
 import { ColumnChart } from '@/components/charts/ColumnChart';
+import { HydrologyPanel } from '@/components/environment/HydrologyPanel';
 import { StationExplorer } from '@/components/environment/StationExplorer';
 import { toneDot, toneText } from '@/components/environment/AqiIndicator';
 import { PageHero, SectionHeader, SourceNote } from '@/components/ui/section';
 import { AQI_SCALE, aqiCategory, uvCategory } from '@/lib/air-quality';
-import { getAirQuality } from '@/lib/server/environment';
+import { getAirQuality, getHydrology } from '@/lib/server/environment';
 import { getWeather } from '@/lib/server/sources/open-meteo';
 import { formatDateTime, formatNumber } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -28,7 +29,8 @@ const UV_COLOR: Record<string, string> = {
 const hourFormatter = new Intl.DateTimeFormat('es-CO', { timeZone: 'America/Bogota', hour: 'numeric' });
 
 export default async function AirPage() {
-  const [airResult, weatherResult] = await Promise.allSettled([getAirQuality(), getWeather()]);
+  const [airResult, weatherResult, hydrologyResult] = await Promise.allSettled([getAirQuality(), getWeather(), getHydrology()]);
+  const hydrology = hydrologyResult.status === 'fulfilled' ? hydrologyResult.value : null;
   const air = airResult.status === 'fulfilled' ? airResult.value : null;
   const weather = weatherResult.status === 'fulfilled' ? weatherResult.value : null;
   const category = air ? aqiCategory(air.ica) : null;
@@ -130,6 +132,20 @@ export default async function AirPage() {
               className="mb-8"
             />
             <StationExplorer stations={air.stations} />
+          </div>
+        </section>
+      )}
+
+      {hydrology && (
+        <section id="lluvia" className="scroll-mt-16 py-14 sm:py-20">
+          <div className="container-page">
+            <SectionHeader
+              eyebrow="Lluvia y quebradas"
+              title="¿Está lloviendo?"
+              description="Pluviómetros y sensores de nivel del SIATA en tiempo real. Útil para decidir si salir y para estar atento a crecientes."
+              className="mb-8"
+            />
+            <HydrologyPanel data={hydrology} />
           </div>
         </section>
       )}
